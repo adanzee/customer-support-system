@@ -32,6 +32,21 @@ defmodule CustomerSupport.Accounts.Customer do
     |> put_password_hash()
   end
 
+  def profile_changeset(customer, attrs) do
+    customer
+    |> cast(attrs, [:name, :phone])
+    |> validate_required([:name, :phone])
+  end
+
+  def password_changeset(customer, attrs) do
+    customer
+    |> cast(attrs, [:password, :password_confirmation])
+    |> validate_required([:password, :password_confirmation])
+    |> validate_length(:password, min: 8)
+    |> validate_confirmation(:password, required: true)
+    |> put_password_hash()
+  end
+
   defp put_password_hash(changeset) do
     if password = get_change(changeset, :password) do
       put_change(changeset, :password_hash, Bcrypt.hash_pwd_salt(password))

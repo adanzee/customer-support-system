@@ -26,6 +26,10 @@ defmodule CustomerSupportWeb.Router do
 
     live "/dashboard", CustomerDashboardLive
     live "/requests/new", RequestNewLive
+    live "/requests", RequestIndexLive
+    live "/requests/:id", RequestShowLive
+    live "/profile", CustomerProfileLive
+    live "/change-password", CustomerChangePasswordLive
   end
 
   # Other scopes may use custom stacks.

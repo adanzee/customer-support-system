@@ -26,4 +26,25 @@ defmodule CustomerSupport.Accounts do
   def get_customer(customer_id) do
     Repo.get(Customer, customer_id)
   end
+
+ def update_customer(customer, attrs) do
+    customer
+    |> Customer.profile_changeset(attrs)
+    |> Repo.update()
+  end
+
+  def change_password(customer, attrs) do
+    if Bcrypt.verify_pass(attrs["current_password"], customer.password_hash) do
+      password_attrs = %{
+        "password" => attrs["new_password"],
+        "password_confirmation" => attrs["new_password_confirmation"]
+      }
+
+      customer
+      |> Customer.password_changeset(password_attrs)
+      |> Repo.update()
+    else
+      {:error, :invalid_current_password}
+    end
+  end
 end

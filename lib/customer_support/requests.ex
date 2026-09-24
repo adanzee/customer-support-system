@@ -16,4 +16,8 @@ defmodule CustomerSupport.Requests do
     |> order_by([r], desc: r.inserted_at)
     |> Repo.all()
   end
+
+  def get_request(request_id) do
+    Repo.get(Request, request_id)
+  end
 end
