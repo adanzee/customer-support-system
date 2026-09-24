@@ -10,6 +10,8 @@ defmodule CustomerSupportWeb.Router do
     plug :put_secure_browser_headers
   end
 
+
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -21,6 +23,9 @@ defmodule CustomerSupportWeb.Router do
     post "/login", CustomerLoginController, :create
     live "/register", CustomerRegistrationLive
     live "/login", CustomerLoginLive
+
+    live "/dashboard", CustomerDashboardLive
+    live "/requests/new", RequestNewLive
   end
 
   # Other scopes may use custom stacks.

@@ -13,6 +13,10 @@ defmodule CustomerSupport.Accounts.Customer do
     field :password_confirmation, :string, virtual: true
     field :password_hash, :string
 
+    has_many :requests, CustomerSupport.Requests.Request,
+    foreign_key: :customer_id,
+    references: :customer_id
+
     timestamps()
   end
 

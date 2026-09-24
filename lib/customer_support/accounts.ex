@@ -11,6 +11,7 @@ defmodule CustomerSupport.Accounts do
   def get_customer_by_email(email) do
     Repo.get_by(Customer, email: String.downcase(email))
   end
+
   # does a customer with this email exist
   def authenticate_customer(email, password) do
     customer = get_customer_by_email(email)
@@ -20,5 +21,9 @@ defmodule CustomerSupport.Accounts do
     else
       {:error, :invalid_credentials}
     end
+  end
+
+  def get_customer(customer_id) do
+    Repo.get(Customer, customer_id)
   end
 end
