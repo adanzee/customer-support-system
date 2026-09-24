@@ -9,18 +9,9 @@ defmodule CustomerSupport.Accounts do
   end
 
   def get_customer_by_email(email) do
-    Customer
-    |> Repo.get_by(email: email)
+    Repo.get_by(Customer, email: String.downcase(email))
   end
-
-
-  def get_customer(id) do
-    Customer
-    |> Repo.get(id)
-  end
-
-
-
+  # does a customer with this email exist
   def authenticate_customer(email, password) do
     customer = get_customer_by_email(email)
 

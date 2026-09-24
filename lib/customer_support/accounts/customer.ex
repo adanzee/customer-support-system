@@ -1,37 +1,38 @@
 defmodule CustomerSupport.Accounts.Customer do
   use Ecto.Schema
   import Ecto.Changeset
-  alias CustomerSupport.Requests.Request
+
+  @primary_key {:customer_id, :binary_id, autogenerate: true}
+  @foreign_key_type :binary_id
 
   schema "customers" do
-
-    field :full_name, :string
+    field :name, :string
     field :email, :string
-    field :phone_number, :string
-    field :password, :string, virtual: true, redact: true
-    field :password_hash, :string, redact: true
+    field :phone, :string
+    field :password, :string, virtual: true
+    field :password_confirmation, :string, virtual: true
+    field :password_hash, :string
 
-    has_many :requests, Request
-
-    timestamps(type: :utc_datetime)
+    timestamps()
   end
 
   def registration_changeset(customer, attrs) do
     customer
-    |> cast(attrs, [:full_name, :email, :phone_number, :password])
-    |> validate_required([:full_name, :email, :phone_number, :password])
+    |> cast(attrs, [:name, :email, :phone, :password, :password_confirmation])
+    |> update_change(:email, &String.downcase/1)
+    |> validate_required([:name, :email, :phone, :password, :password_confirmation])
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/)
     |> validate_length(:password, min: 8)
     |> validate_confirmation(:password, required: true)
     |> unique_constraint(:email)
-    |> hash_password()
+    |> put_password_hash()
   end
 
-  defp hash_password(%Ecto.Changeset{valid?: true} = changeset) do
-    password = get_change(changeset, :password)
-
-    put_change(changeset, :password_hash, Bcrypt.hash_pwd_salt(password))
+  defp put_password_hash(changeset) do
+    if password = get_change(changeset, :password) do
+      put_change(changeset, :password_hash, Bcrypt.hash_pwd_salt(password))
+    else
+      changeset
+    end
   end
-
-  defp hash_password(changeset), do: changeset
 end

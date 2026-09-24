@@ -4,7 +4,6 @@ defmodule CustomerSupportWeb.Router do
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
-    plug CustomerSupportWeb.Plugs.CustomerAuth, :fetch_current_customer
     plug :fetch_live_flash
     plug :put_root_layout, html: {CustomerSupportWeb.Layouts, :root}
     plug :protect_from_forgery
@@ -18,19 +17,10 @@ defmodule CustomerSupportWeb.Router do
   scope "/", CustomerSupportWeb do
     pipe_through :browser
 
-    get "/login/session/:id", CustomerSessionController, :create
     post "/register", CustomerRegistrationController, :create
-
-
-    delete "/logout", CustomerSessionController, :delete
-
-    live "/", CustomerPortalLive
+    post "/login", CustomerLoginController, :create
     live "/register", CustomerRegistrationLive
     live "/login", CustomerLoginLive
-    live "/profile", CustomerProfileLive
-    live "/requests/new", RequestNewLive
-
-
   end
 
   # Other scopes may use custom stacks.
