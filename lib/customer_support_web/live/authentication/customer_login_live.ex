@@ -86,9 +86,9 @@ defmodule CustomerSupportWeb.CustomerLoginLive do
                   <label for="customer_password" class="block text-xs font-bold text-[#3C5070] uppercase tracking-wider">
                     Password
                   </label>
-                  <a href="/forgot-password" class="text-xs font-semibold text-[#3C5070] hover:text-[#112250] hover:underline transition">
+                  <.link navigate={~p"/forgot-password"} class="text-xs font-semibold text-[#3C5070] hover:text-[#112250] hover:underline transition">
                     Forgot password?
-                  </a>
+                  </.link>
                 </div>
 
                 <div class="relative">

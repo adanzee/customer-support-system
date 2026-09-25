@@ -10,6 +10,10 @@ defmodule CustomerSupportWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :customer_auth do
+    plug CustomerSupportWeb.Plugs.CustomerAuth
+  end
+
 
 
   pipeline :api do
@@ -19,16 +23,26 @@ defmodule CustomerSupportWeb.Router do
   scope "/", CustomerSupportWeb do
     pipe_through :browser
 
+    live "/", CustomerHomeLive
     post "/register", CustomerRegistrationController, :create
     post "/login", CustomerLoginController, :create
+    post "/logout", CustomerLogoutController, :logout
+
     live "/register", CustomerRegistrationLive
     live "/login", CustomerLoginLive
+    live "/forgot-password", CustomerForgotPasswordLive
+    live "/reset-password/:token", CustomerResetPasswordLive
+  end
+
+  scope "/", CustomerSupportWeb do
+    pipe_through [:browser, :customer_auth]
 
     live "/dashboard", CustomerDashboardLive
     live "/requests/new", RequestNewLive
     live "/requests", RequestIndexLive
     live "/requests/:id", RequestShowLive
     live "/profile", CustomerProfileLive
+    live "/profile/edit", CustomerEditProfileLive
     live "/change-password", CustomerChangePasswordLive
   end
 

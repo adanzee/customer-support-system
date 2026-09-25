@@ -11,7 +11,7 @@ defmodule CustomerSupportWeb.CustomerRegistrationController do
         |> put_flash(:info, "Account created successfully.")
         |> redirect(to: ~p"/login")
 
-      {:error, changeset} ->
+      {:error, _changeset} ->
         # We'll handle validation errors properly with LiveView shortly.
         conn
         |> put_status(:unprocessable_entity)

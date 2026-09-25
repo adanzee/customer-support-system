@@ -33,45 +33,59 @@ defmodule CustomerSupportWeb.Layouts do
 
   slot :inner_block, required: true
 
-  def app(assigns) do
+    def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://phoenix.hexdocs.pm/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </header>
+    <div class="min-h-screen !bg-[#F5F0E9] !text-[#112250]">
+      <header class="!bg-[#112250] border-b border-[#3C5070]">
+        <div class="navbar px-4 sm:px-6 lg:px-8">
+          <div class="flex-1">
+            <.link
+              navigate={~p"/dashboard"}
+              class="text-xl font-bold !text-[#F5F0E9]"
+            >
+              Customer Support
+            </.link>
+          </div>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
-        {render_slot(@inner_block)}
-      </div>
-    </main>
+          <nav class="flex items-center gap-2">
+            <.link
+              navigate={~p"/dashboard"}
+              class="btn btn-ghost !text-[#F5F0E9]"
+            >
+              Dashboard
+            </.link>
 
-    <.flash_group flash={@flash} />
+            <.link
+              navigate={~p"/requests"}
+              class="btn btn-ghost !text-[#F5F0E9]"
+            >
+              My Requests
+            </.link>
+
+            <.link
+              navigate={~p"/requests/new"}
+              class="btn !bg-[#E0C58F] !text-[#112250] !border-[#E0C58F]"
+            >
+              New Request
+            </.link>
+
+            <div class="hidden sm:block ml-2">
+              <.theme_toggle />
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      <main class="px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-6xl">
+          {render_slot(@inner_block)}
+        </div>
+      </main>
+
+      <.flash_group flash={@flash} />
+    </div>
     """
   end
-
   @doc """
   Shows the flash group with standard titles and content.
 

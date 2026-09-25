@@ -11,7 +11,7 @@ defmodule CustomerSupportWeb.Plugs.CustomerAuth do
       nil ->
         conn
         |> put_session(:auth_error, "Please log in first.")
-        |> redirect("/login")
+        |> redirect(to: "/login")
         |> halt()
 
       customer_id ->
@@ -20,7 +20,7 @@ defmodule CustomerSupportWeb.Plugs.CustomerAuth do
             conn
             |> delete_session(:customer_id)
             |> put_session(:auth_error, "Please log in again.")
-            |> redirect("/login")
+            |> redirect(to: "/login")
             |> halt()
 
           customer ->

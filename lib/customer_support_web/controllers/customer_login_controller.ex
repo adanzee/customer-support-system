@@ -3,7 +3,7 @@ defmodule CustomerSupportWeb.CustomerLoginController do
 
   alias CustomerSupport.Accounts
 
-  def create(conn, %{"email" => email, "password" => password}) do
+  def create(conn, %{"customer" => %{"email" => email, "password" => password}}) do
     case Accounts.authenticate_customer(email, password) do
       {:ok, customer} ->
         conn
