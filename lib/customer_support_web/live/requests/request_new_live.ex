@@ -5,8 +5,11 @@ defmodule CustomerSupportWeb.RequestNewLive do
   alias CustomerSupport.Mailers.CustomerMailer
   alias CustomerSupport.Accounts
 
-  def mount(_params, _session, socket) do
-    {:ok, socket}
+  def mount(_params, session, socket) do
+    customer_id = session["customer_id"]
+    customer = Accounts.get_customer(customer_id)
+
+    {:ok, assign(socket, :customer, customer)}
   end
 
 def handle_event("create_request", %{"request" => request_params}, socket) do

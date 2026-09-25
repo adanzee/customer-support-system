@@ -81,20 +81,26 @@ defmodule CustomerSupportWeb.RequestIndexLive do
                 <tr class="hover:bg-[#F5F0E9]/30 transition-colors cursor-pointer group">
 
                   <!-- REQUEST ID WITH LINK -->
-                  <td class="py-4 px-6">
-                    <.link navigate={~p"/requests"} class="inline-block">
-                      <code class="px-2.5 py-1 rounded-lg bg-[#F5F0E9] border border-[#D9CBC2]/60 font-mono text-xs text-[#3C5070] group-hover:border-[#112250] transition-colors">
-                        # <%= String.slice(to_string(request.request_id || request.id), 0..7) %>...
-                      </code>
-                    </.link>
-                  </td>
+                    <td class="py-4 px-6">
+                      <.link
+                        navigate={~p"/requests/#{request.request_id}"}
+                        class="inline-block"
+                      >
+                        <code class="px-2.5 py-1 rounded-lg bg-[#F5F0E9] border border-[#D9CBC2]/60 font-mono text-xs text-[#3C5070] group-hover:border-[#112250] transition-colors">
+                          # <%= String.slice(to_string(request.request_id || request.id), 0..7) %>...
+                        </code>
+                      </.link>
+                    </td>
 
-                  <!-- TITLE -->
-                  <td class="py-4 px-6">
-                    <.link navigate={~p"/requests"} class="font-bold text-[#112250] group-hover:text-[#3C5070] transition-colors">
-                      <%= request.title %>
-                    </.link>
-                  </td>
+                    <!-- TITLE -->
+                    <td class="py-4 px-6">
+                      <.link
+                        navigate={~p"/requests/#{request.request_id}"}
+                        class="font-bold text-[#112250] group-hover:text-[#3C5070] transition-colors"
+                      >
+                        <%= request.title %>
+                      </.link>
+                    </td>
 
                   <!-- CATEGORY -->
                   <td class="py-4 px-6 text-[#3C5070]">

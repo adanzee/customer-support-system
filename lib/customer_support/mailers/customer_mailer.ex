@@ -3,6 +3,43 @@ defmodule CustomerSupport.Mailers.CustomerMailer do
 
   @from {"Customer Support", "no-reply@customer-support.local"}
 
+  def registration_email(customer) do
+    new()
+    |> to(customer.email)
+    |> from(@from)
+    |> subject("Welcome to Customer Support")
+    |> html_body("""
+    #{email_layout("Welcome to Customer Support", """
+    <p>Hello #{customer.name},</p>
+
+    <p>
+      Your Customer Support account has been successfully created.
+    </p>
+
+    <p>
+      You can now log in to your account, submit support requests,
+      and track their status.
+    </p>
+
+    #{notice("Thank you for creating an account with Customer Support.")}
+    """)}
+    """)
+    |> text_body("""
+    Hello #{customer.name},
+
+    Welcome to Customer Support.
+
+    Your Customer Support account has been successfully created.
+
+    You can now log in to your account, submit support requests,
+    and track their status.
+
+    Thank you for creating an account with Customer Support.
+
+    Customer Support
+    """)
+  end
+
   def password_reset_email(customer, token) do
     reset_url = "http://localhost:4000/reset-password/#{token}"
 

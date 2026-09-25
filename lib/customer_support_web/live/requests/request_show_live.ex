@@ -80,11 +80,14 @@ end
                 Description
               </div>
 
-              <div class="rounded-2xl border border-[#D9CBC2]/50 bg-[#F5F0E9]/50 p-6 leading-relaxed text-[#112250] min-h-[160px]">
-                <p class="whitespace-pre-wrap font-normal text-base">
+
+              <div class="rounded-2xl border border-[#D9CBC2]/50 bg-[#F5F0E9]/50 p-6 leading-relaxed text-[#112250] text-left min-h-[160px]">
+                <p class="whitespace-pre-wrap font-normal text-base text-left">
                   <%= @request.description %>
                 </p>
               </div>
+
+
             </div>
           </div>
 

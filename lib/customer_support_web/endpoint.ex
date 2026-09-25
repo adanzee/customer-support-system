@@ -5,11 +5,12 @@ defmodule CustomerSupportWeb.Endpoint do
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
   @session_options [
-    store: :cookie,
-    key: "_customer_support_key",
-    signing_salt: "v/Xtqhc7",
-    same_site: "Lax"
-  ]
+  store: :cookie,
+  key: "_customer_support_key",
+  signing_salt: "v/Xtqhc7",
+  same_site: "Lax",
+  max_age: 60 * 60 * 24 * 30
+]
 
   socket "/live", Phoenix.LiveView.Socket,
     websocket: [connect_info: [session: @session_options]],
