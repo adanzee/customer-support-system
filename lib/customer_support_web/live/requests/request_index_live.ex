@@ -15,15 +15,15 @@ defmodule CustomerSupportWeb.RequestIndexLive do
     ~H"""
       <div class="max-w-6xl mx-auto space-y-8 py-4 font-sans">
 
-      <!-- PAGE HEADER BANNER -->
+
       <div class="relative overflow-hidden rounded-3xl bg-[#112250] p-8 md:p-10 text-[#F5F0E9] shadow-xl">
-        <!-- Background Glow Effects -->
+
         <div class="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-[#3C5070]/30 blur-2xl pointer-events-none"></div>
         <div class="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-[#E0C58F]/10 blur-3xl pointer-events-none"></div>
 
         <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
-            <!-- TOP NAVIGATION BAR (DASHBOARD ACCESS) -->
+
             <div class="flex items-center gap-4 mb-3">
               <.link
                 navigate={~p"/dashboard"}
@@ -49,7 +49,7 @@ defmodule CustomerSupportWeb.RequestIndexLive do
             </p>
           </div>
 
-          <!-- NEW REQUEST ACTION BUTTON -->
+
           <div class="self-start sm:self-auto">
             <.link
               navigate={~p"/requests/new"}
@@ -62,7 +62,7 @@ defmodule CustomerSupportWeb.RequestIndexLive do
         </div>
       </div>
 
-      <!-- REQUESTS TABLE CARD -->
+
       <div class="rounded-3xl border border-[#D9CBC2]/60 bg-white shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
@@ -80,7 +80,7 @@ defmodule CustomerSupportWeb.RequestIndexLive do
               <%= for request <- @requests do %>
                 <tr class="hover:bg-[#F5F0E9]/30 transition-colors cursor-pointer group">
 
-                  <!-- REQUEST ID WITH LINK -->
+
                     <td class="py-4 px-6">
                       <.link
                         navigate={~p"/requests/#{request.request_id}"}

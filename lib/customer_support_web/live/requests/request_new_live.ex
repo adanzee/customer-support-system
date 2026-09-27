@@ -41,9 +41,8 @@ def handle_event("create_request", %{"request" => request_params}, socket) do
     ~H"""
       <div class="max-w-4xl mx-auto space-y-8 py-4 font-sans">
 
-        <!-- PAGE HEADER BANNER -->
         <div class="relative overflow-hidden rounded-3xl bg-[#112250] p-8 md:p-10 text-[#F5F0E9] shadow-xl">
-          <!-- Decorative Glows -->
+
           <div class="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-[#3C5070]/30 blur-2xl pointer-events-none"></div>
           <div class="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-[#E0C58F]/10 blur-3xl pointer-events-none"></div>
 
@@ -66,7 +65,7 @@ def handle_event("create_request", %{"request" => request_params}, socket) do
           </div>
         </div>
 
-        <!-- FORM CARD CONTAINER -->
+
         <div class="rounded-3xl border border-[#D9CBC2]/60 bg-white p-6 sm:p-10 shadow-sm">
           <form phx-submit="create_request" class="space-y-8">
 

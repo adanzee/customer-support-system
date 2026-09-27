@@ -25,7 +25,7 @@ end
 
       <%= if @request do %>
 
-        <!-- PAGE HEADER BANNER -->
+
         <div class="relative overflow-hidden rounded-3xl bg-[#112250] p-8 md:p-10 text-[#F5F0E9] shadow-xl">
           <div class="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-[#3C5070]/30 blur-2xl pointer-events-none"></div>
           <div class="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-[#E0C58F]/10 blur-3xl pointer-events-none"></div>
@@ -48,7 +48,6 @@ end
               </p>
             </div>
 
-            <!-- ID TAG IN HEADER -->
             <div class="bg-[#3C5070]/30 p-3 rounded-2xl border border-[#E0C58F]/20 backdrop-blur-sm self-start sm:self-auto">
               <span class="text-xs uppercase tracking-wider text-[#D9CBC2] block font-bold mb-0.5">Ticket UUID</span>
               <code class="font-mono text-xs text-[#E0C58F] break-all">
@@ -58,10 +57,8 @@ end
           </div>
         </div>
 
-        <!-- TWO-COLUMN CONTENT GRID -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          <!-- MAIN TICKET CONTENT (2 COLUMNS) -->
           <div class="lg:col-span-2 space-y-6">
             <div class="rounded-3xl border border-[#D9CBC2]/60 bg-white p-8 shadow-sm">
               <div class="flex items-center gap-2 mb-2 text-xs font-bold uppercase tracking-wider text-[#3C5070]">
@@ -91,7 +88,6 @@ end
             </div>
           </div>
 
-          <!-- SIDEBAR METADATA CARD (1 COLUMN) -->
           <div class="space-y-6">
             <div class="rounded-3xl border border-[#D9CBC2]/60 bg-white p-6 shadow-sm space-y-6">
               <h3 class="text-lg font-bold text-[#112250] border-b border-[#D9CBC2]/40 pb-4">

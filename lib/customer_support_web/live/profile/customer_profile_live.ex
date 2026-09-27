@@ -34,9 +34,9 @@ defmodule CustomerSupportWeb.CustomerProfileLive do
     ~H"""
     <div class="max-w-4xl mx-auto space-y-8 py-4 font-sans">
 
-      <!-- PAGE HEADER BANNER -->
+
       <div class="relative overflow-hidden rounded-3xl bg-[#112250] p-8 md:p-10 text-[#F5F0E9] shadow-xl">
-        <!-- Ambient Background Glows -->
+
         <div class="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-[#3C5070]/30 blur-2xl pointer-events-none"></div>
         <div class="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-[#E0C58F]/10 blur-3xl pointer-events-none"></div>
 
@@ -64,10 +64,9 @@ defmodule CustomerSupportWeb.CustomerProfileLive do
         </div>
       </div>
 
-      <!-- ACCOUNT INFORMATION CARD -->
       <div class="overflow-hidden rounded-3xl border border-[#D9CBC2]/60 bg-white shadow-sm">
 
-        <!-- CARD HEADER -->
+
         <div class="border-b border-[#D9CBC2]/40 bg-[#F5F0E9]/60 px-6 py-5 sm:px-8">
           <div class="flex items-center gap-4">
             <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#112250] text-[#E0C58F] shadow-md">
@@ -85,10 +84,10 @@ defmodule CustomerSupportWeb.CustomerProfileLive do
           </div>
         </div>
 
-        <!-- INFORMATION DETAILS LIST -->
+
         <div class="divide-y divide-[#D9CBC2]/30">
 
-          <!-- NAME -->
+
           <div class="flex items-start gap-4 px-6 py-5 sm:px-8 hover:bg-[#F5F0E9]/20 transition-colors">
             <div class="mt-1 text-[#3C5070]">
               <.icon name="hero-user-circle" class="size-5" />
@@ -103,7 +102,7 @@ defmodule CustomerSupportWeb.CustomerProfileLive do
             </div>
           </div>
 
-          <!-- EMAIL -->
+
           <div class="flex items-start gap-4 px-6 py-5 sm:px-8 hover:bg-[#F5F0E9]/20 transition-colors">
             <div class="mt-1 text-[#3C5070]">
               <.icon name="hero-envelope" class="size-5" />
@@ -118,7 +117,6 @@ defmodule CustomerSupportWeb.CustomerProfileLive do
             </div>
           </div>
 
-          <!-- PHONE -->
           <div class="flex items-start gap-4 px-6 py-5 sm:px-8 hover:bg-[#F5F0E9]/20 transition-colors">
             <div class="mt-1 text-[#3C5070]">
               <.icon name="hero-phone" class="size-5" />
@@ -133,7 +131,7 @@ defmodule CustomerSupportWeb.CustomerProfileLive do
             </div>
           </div>
 
-          <!-- PASSWORD -->
+
           <div class="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8 hover:bg-[#F5F0E9]/20 transition-colors">
             <div class="flex items-start gap-4">
               <div class="mt-1 text-[#3C5070]">
@@ -160,7 +158,6 @@ defmodule CustomerSupportWeb.CustomerProfileLive do
 
         </div>
 
-        <!-- FOOTER BAR -->
         <div class="border-t border-[#D9CBC2]/40 bg-[#F5F0E9]/30 px-6 py-4 sm:px-8 flex justify-end">
           <.link
             navigate={~p"/profile/edit"}
@@ -173,7 +170,7 @@ defmodule CustomerSupportWeb.CustomerProfileLive do
 
       </div>
 
-      <!-- SYSTEM IDENTIFIER CARD -->
+      <!-- SYSTEM IDENTIFIER CARD
       <div class="rounded-3xl border border-[#D9CBC2]/60 bg-white p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <p class="text-xs font-bold uppercase tracking-wider text-[#3C5070]">
@@ -189,6 +186,7 @@ defmodule CustomerSupportWeb.CustomerProfileLive do
           Account Reference
         </div>
       </div>
+      -->
 
     </div>
     """

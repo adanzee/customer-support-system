@@ -28,9 +28,9 @@ defmodule CustomerSupportWeb.CustomerEditProfileLive do
     ~H"""
     <div class="max-w-4xl mx-auto space-y-8 py-4 font-sans">
 
-      <!-- PAGE HEADER BANNER -->
+
       <div class="relative overflow-hidden rounded-3xl bg-[#112250] p-8 md:p-10 text-[#F5F0E9] shadow-xl">
-        <!-- Ambient Glow Effects -->
+
         <div class="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-[#3C5070]/30 blur-2xl pointer-events-none"></div>
         <div class="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-[#E0C58F]/10 blur-3xl pointer-events-none"></div>
 
@@ -53,10 +53,10 @@ defmodule CustomerSupportWeb.CustomerEditProfileLive do
         </div>
       </div>
 
-      <!-- EDIT FORM CARD -->
+
       <div class="overflow-hidden rounded-3xl border border-[#D9CBC2]/60 bg-white shadow-sm">
 
-        <!-- CARD HEADER -->
+
         <div class="border-b border-[#D9CBC2]/40 bg-[#F5F0E9]/60 px-6 py-5 sm:px-8">
           <div class="flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#112250] text-[#E0C58F] shadow-sm">
@@ -88,13 +88,7 @@ defmodule CustomerSupportWeb.CustomerEditProfileLive do
                   <.icon name="hero-user" class="size-4" />
                 </div>
 
-                <input
-                  id="customer_name"
-                  type="text"
-                  name="customer[name]"
-                  value={@customer.name}
-                  required
-                  placeholder="e.g. Jane Doe"
+                <input id="customer_name" type="text"  name="customer[name]"  value={@customer.name}  required placeholder="e.g. Jane Doe"
                   class="w-full rounded-xl border border-[#D9CBC2] bg-[#F5F0E9]/40 pl-11 pr-4 py-3.5 text-sm text-[#112250] placeholder-[#3C5070]/50 shadow-inner outline-none transition-all duration-200 focus:border-[#112250] focus:bg-white focus:ring-2 focus:ring-[#E0C58F]"
                 />
               </div>
@@ -111,14 +105,7 @@ defmodule CustomerSupportWeb.CustomerEditProfileLive do
                   <.icon name="hero-envelope" class="size-4" />
                 </div>
 
-                <input
-                  id="customer_email"
-                  type="email"
-                  name="customer[email]"
-                  value={@customer.email}
-                  required
-                  placeholder="e.g. name@example.com"
-                  class="w-full rounded-xl border border-[#D9CBC2] bg-[#F5F0E9]/40 pl-11 pr-4 py-3.5 text-sm text-[#112250] placeholder-[#3C5070]/50 shadow-inner outline-none transition-all duration-200 focus:border-[#112250] focus:bg-white focus:ring-2 focus:ring-[#E0C58F]"
+                <input id="customer_email" type="email" name="customer[email]" value={@customer.email} required placeholder="e.g. name@example.com" class="w-full rounded-xl border border-[#D9CBC2] bg-[#F5F0E9]/40 pl-11 pr-4 py-3.5 text-sm text-[#112250] placeholder-[#3C5070]/50 shadow-inner outline-none transition-all duration-200 focus:border-[#112250] focus:bg-white focus:ring-2 focus:ring-[#E0C58F]"
                 />
               </div>
             </div>
@@ -134,19 +121,12 @@ defmodule CustomerSupportWeb.CustomerEditProfileLive do
                   <.icon name="hero-phone" class="size-4" />
                 </div>
 
-                <input
-                  id="customer_phone"
-                  type="tel"
-                  name="customer[phone]"
-                  value={@customer.phone}
-                  required
-                  placeholder="e.g. +1 (555) 000-0000"
-                  class="w-full rounded-xl border border-[#D9CBC2] bg-[#F5F0E9]/40 pl-11 pr-4 py-3.5 text-sm text-[#112250] placeholder-[#3C5070]/50 shadow-inner outline-none transition-all duration-200 focus:border-[#112250] focus:bg-white focus:ring-2 focus:ring-[#E0C58F]"
-                />
+                <input id="customer_phone" type="tel" name="customer[phone]" value={@customer.phone} required placeholder="e.g. +1 (555) 000-0000"
+                  class="w-full rounded-xl border border-[#D9CBC2] bg-[#F5F0E9]/40 pl-11 pr-4 py-3.5 text-sm text-[#112250] placeholder-[#3C5070]/50 shadow-inner outline-none transition-all duration-200 focus:border-[#112250] focus:bg-white focus:ring-2 focus:ring-[#E0C58F]"/>
               </div>
             </div>
 
-            <!-- FOOTER ACTIONS -->
+
             <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-6 border-t border-[#D9CBC2]/40">
               <.link
                 navigate={~p"/profile"}

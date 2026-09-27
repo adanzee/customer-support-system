@@ -39,12 +39,12 @@ defmodule CustomerSupportWeb.CustomerResetPasswordLive do
     ~H"""
     <div class="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col justify-center items-center p-6 font-sans selection:bg-[#3B82F6] selection:text-white relative overflow-hidden">
 
-      <!-- BACKGROUND AMBIENT GLOW -->
+
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-[#3B82F6]/10 via-[#F59E0B]/5 to-transparent rounded-full blur-3xl pointer-events-none"></div>
 
       <div class="max-w-md w-full space-y-8 relative z-10">
 
-        <!-- HEADER BRANDING & HEADING -->
+
         <div class="text-center space-y-3">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1E40AF]/10 border border-[#1E40AF]/20 text-[#1D4ED8] text-[10px] font-mono uppercase tracking-widest font-bold">
             <span class="h-1.5 w-1.5 rounded-full bg-[#F59E0B]"></span>
@@ -60,10 +60,10 @@ defmodule CustomerSupportWeb.CustomerResetPasswordLive do
           </p>
         </div>
 
-        <!-- FORM CARD -->
+
         <div class="bg-white p-8 rounded-[2rem] border border-[#E2E8F0] shadow-xl shadow-[#0F172A]/5 space-y-6">
 
-          <!-- SUCCESS STATE -->
+
           <%= if @reset_success do %>
 
             <div class="text-center py-8">
@@ -72,7 +72,6 @@ defmodule CustomerSupportWeb.CustomerResetPasswordLive do
               </h2>
             </div>
 
-          <!-- RESET FORM STATE -->
           <% else %>
 
             <%= if @reset_token do %>
@@ -85,13 +84,43 @@ defmodule CustomerSupportWeb.CustomerResetPasswordLive do
                     New Password
                   </label>
 
-                  <input
-                    type="password"
-                    name="password[password]"
-                    required
-                    placeholder="••••••••"
-                    class="w-full px-4 py-3 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#0F172A] text-sm placeholder-[#94A3B8] focus:outline-none focus:border-[#1D4ED8] focus:bg-white focus:ring-4 focus:ring-[#1D4ED8]/10 transition-all"
-                  />
+                  <div class="relative">
+                    <input
+                      type="password"
+                      id="reset_password"
+                      name="password[password]"
+                      required
+                      placeholder="••••••••"
+                      class="w-full px-4 py-3 pr-12 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#0F172A] text-sm placeholder-[#94A3B8] focus:outline-none focus:border-[#1D4ED8] focus:bg-white focus:ring-4 focus:ring-[#1D4ED8]/10 transition-all"
+                    />
+
+                    <button
+                      type="button"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#1D4ED8] transition-colors"
+                      onclick="
+                        const input = document.getElementById('reset_password');
+                        const show = document.getElementById('reset-password-eye-show');
+                        const hide = document.getElementById('reset-password-eye-hide');
+
+                        if (input.type === 'password') {
+                          input.type = 'text';
+                          show.classList.add('hidden');
+                          hide.classList.remove('hidden');
+                        } else {
+                          input.type = 'password';
+                          show.classList.remove('hidden');
+                          hide.classList.add('hidden');
+                        }
+                      "
+                    >
+                      <span id="reset-password-eye-show">
+                        👁
+                      </span>
+                      <span id="reset-password-eye-hide" class="hidden">
+                        🙈
+                      </span>
+                    </button>
+                  </div>
 
                   <%= if @changeset && @changeset.errors[:password] do %>
                     <p class="text-xs text-red-500">
@@ -106,13 +135,43 @@ defmodule CustomerSupportWeb.CustomerResetPasswordLive do
                     Confirm New Password
                   </label>
 
-                  <input
-                    type="password"
-                    name="password[password_confirmation]"
-                    required
-                    placeholder="••••••••"
-                    class="w-full px-4 py-3 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#0F172A] text-sm placeholder-[#94A3B8] focus:outline-none focus:border-[#1D4ED8] focus:bg-white focus:ring-4 focus:ring-[#1D4ED8]/10 transition-all"
-                  />
+                  <div class="relative">
+                    <input
+                      type="password"
+                      id="reset_password_confirmation"
+                      name="password[password_confirmation]"
+                      required
+                      placeholder="••••••••"
+                      class="w-full px-4 py-3 pr-12 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#0F172A] text-sm placeholder-[#94A3B8] focus:outline-none focus:border-[#1D4ED8] focus:bg-white focus:ring-4 focus:ring-[#1D4ED8]/10 transition-all"
+                    />
+
+                    <button
+                      type="button"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#1D4ED8] transition-colors"
+                      onclick="
+                        const input = document.getElementById('reset_password_confirmation');
+                        const show = document.getElementById('reset-confirm-password-eye-show');
+                        const hide = document.getElementById('reset-confirm-password-eye-hide');
+
+                        if (input.type === 'password') {
+                          input.type = 'text';
+                          show.classList.add('hidden');
+                          hide.classList.remove('hidden');
+                        } else {
+                          input.type = 'password';
+                          show.classList.remove('hidden');
+                          hide.classList.add('hidden');
+                        }
+                      "
+                    >
+                      <span id="reset-confirm-password-eye-show">
+                        👁
+                      </span>
+                      <span id="reset-confirm-password-eye-hide" class="hidden">
+                        🙈
+                      </span>
+                    </button>
+                  </div>
 
                   <%= if @changeset && @changeset.errors[:password_confirmation] do %>
                     <p class="text-xs text-red-500">

@@ -9,9 +9,9 @@ defmodule CustomerSupportWeb.CustomerDashboardLive do
     ~H"""
     <div class="max-w-6xl mx-auto space-y-10 py-4 font-sans">
 
-      <!-- TOP BAR & HERO SECTION -->
+
       <div class="relative overflow-hidden rounded-3xl bg-[#112250] p-8 md:p-10 text-[#F5F0E9] shadow-xl">
-        <!-- Decorative Ambient Glows -->
+
         <div class="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-[#3C5070]/30 blur-2xl pointer-events-none"></div>
         <div class="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-[#E0C58F]/10 blur-3xl pointer-events-none"></div>
 
@@ -31,7 +31,7 @@ defmodule CustomerSupportWeb.CustomerDashboardLive do
             </p>
           </div>
 
-          <!-- QUICK ACCOUNT SETTINGS TOOLBAR (REPLACES CARD) -->
+
           <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 bg-[#3C5070]/30 p-2 rounded-2xl border border-[#E0C58F]/10 backdrop-blur-sm self-start md:self-center">
             <.link
               navigate={~p"/profile"}
@@ -62,10 +62,9 @@ defmodule CustomerSupportWeb.CustomerDashboardLive do
         </div>
       </div>
 
-      <!-- MAIN ACTION CARDS (2-COLUMN GRID) -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-        <!-- CARD 1: MY REQUESTS -->
+
         <div class="group relative rounded-3xl border border-[#D9CBC2]/60 bg-white p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between hover:-translate-y-1">
           <div>
             <div class="w-14 h-14 rounded-2xl bg-[#112250]/5 text-[#112250] flex items-center justify-center mb-6 group-hover:bg-[#112250] group-hover:text-[#F5F0E9] transition-colors duration-300">
@@ -93,7 +92,7 @@ defmodule CustomerSupportWeb.CustomerDashboardLive do
           </div>
         </div>
 
-        <!-- CARD 2: NEED HELP -->
+
         <div class="group relative rounded-3xl border border-[#D9CBC2]/60 bg-white p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between hover:-translate-y-1">
           <div>
             <div class="w-14 h-14 rounded-2xl bg-[#E0C58F]/20 text-[#112250] flex items-center justify-center mb-6 group-hover:bg-[#E0C58F] transition-colors duration-300">
@@ -123,7 +122,7 @@ defmodule CustomerSupportWeb.CustomerDashboardLive do
 
       </div>
 
-      <!-- BOTTOM METRICS BAR -->
+
       <div class="rounded-2xl bg-[#F5F0E9]/60 border border-[#D9CBC2]/50 p-6 flex flex-wrap items-center justify-around gap-4 text-center">
         <div>
           <p class="text-xs font-bold uppercase tracking-wider text-[#3C5070]">Average Response Time</p>

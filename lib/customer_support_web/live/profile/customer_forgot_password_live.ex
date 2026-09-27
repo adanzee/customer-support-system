@@ -55,9 +55,9 @@ defmodule CustomerSupportWeb.CustomerForgotPasswordLive do
     ~H"""
     <div class="max-w-xl mx-auto space-y-6 py-4 font-sans">
 
-      <!-- PAGE HEADER BANNER (COMPACT & VERTICAL) -->
+
       <div class="relative overflow-hidden rounded-3xl bg-[#112250] p-6 sm:p-8 text-[#F5F0E9] shadow-xl text-center">
-        <!-- Ambient Background Glows -->
+
         <div class="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-[#3C5070]/30 blur-2xl pointer-events-none"></div>
         <div class="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-[#E0C58F]/10 blur-3xl pointer-events-none"></div>
 
@@ -84,14 +84,14 @@ defmodule CustomerSupportWeb.CustomerForgotPasswordLive do
         </div>
       </div>
 
-      <!-- MAIN CARD CONTAINER -->
+
       <div class="overflow-hidden rounded-3xl border border-[#D9CBC2]/60 bg-white shadow-sm">
 
-        <!-- FORM SECTION -->
+
         <div class="p-6 sm:p-8">
           <form phx-submit="send_reset_link" class="space-y-6">
 
-            <!-- EMAIL ADDRESS FIELD -->
+
             <div class="space-y-2">
               <label for="email" class="block text-sm font-bold text-[#112250]">
                 Email Address <span class="text-rose-500">*</span>
@@ -118,7 +118,7 @@ defmodule CustomerSupportWeb.CustomerForgotPasswordLive do
               </div>
             </div>
 
-            <!-- ALERT MESSAGE -->
+
             <%= if @message do %>
               <div class={[
                 "rounded-xl border p-4 transition-all duration-200",
@@ -155,7 +155,7 @@ defmodule CustomerSupportWeb.CustomerForgotPasswordLive do
 
       </div>
 
-      <!-- FOOTER NAVIGATION LINK -->
+
       <div class="text-center pt-2">
         <span class="text-xs sm:text-sm text-[#3C5070]">
           Remember your password?

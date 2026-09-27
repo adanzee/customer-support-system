@@ -7,7 +7,7 @@ defmodule CustomerSupportWeb.CustomerHomeLive do
 
       <div class="max-w-6xl mx-auto w-full my-auto space-y-10">
 
-        <!-- TOP NAVIGATION BAR -->
+
         <header class="flex items-center justify-between pb-6 border-b border-[#E2E8F0]">
           <div class="flex items-center gap-3">
             <div class="h-3 w-3 rounded-full bg-[#1E40AF] ring-4 ring-[#1E40AF]/15"></div>
@@ -19,12 +19,12 @@ defmodule CustomerSupportWeb.CustomerHomeLive do
 
         </header>
 
-        <!-- MAIN SPLIT CANVAS -->
+
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
 
-          <!-- LEFT HERO POSTER CARD -->
+
           <div class="lg:col-span-5 bg-gradient-to-br from-[#0F172A] via-[#1E3A8A] to-[#0F172A] text-white p-8 sm:p-12 rounded-[2.5rem] flex flex-col justify-between shadow-2xl relative overflow-hidden border border-[#1E293B]">
-            <!-- Ambient Glow Effect -->
+
             <div class="absolute -top-12 -right-12 w-64 h-64 bg-[#3B82F6]/20 rounded-full blur-3xl pointer-events-none"></div>
 
             <div class="space-y-6 relative z-10">
@@ -44,17 +44,14 @@ defmodule CustomerSupportWeb.CustomerHomeLive do
               </p>
             </div>
 
-            <!-- DIAMOND ACCENT AT BOTTOM OF HERO -->
             <div class="pt-8 flex items-center justify-between relative z-10 border-t border-white/10">
               <div class="h-2.5 w-2.5 rotate-45 bg-[#F59E0B] ring-4 ring-[#F59E0B]/20"></div>
               <span class="text-[10px] font-mono text-[#94A3B8] uppercase tracking-widest">GATEWAY v2.4</span>
             </div>
           </div>
 
-          <!-- RIGHT ACTIONS & FEATURE CARDS CONTAINER -->
           <div class="lg:col-span-7 flex flex-col justify-between space-y-8">
 
-            <!-- ACTION BUTTONS BLOCK -->
             <div class="bg-white p-6 sm:p-8 rounded-[2rem] border border-[#E2E8F0] shadow-sm space-y-4">
               <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-[#475569]">
                 Choose an option to continue:
@@ -79,7 +76,6 @@ defmodule CustomerSupportWeb.CustomerHomeLive do
               </div>
             </div>
 
-            <!-- HOW CAN WE HELP GRID -->
             <div class="space-y-4">
               <p class="text-xs font-mono font-bold uppercase tracking-[0.2em] text-[#475569] text-center lg:text-left">
                 HOW CAN WE HELP?
@@ -87,7 +83,6 @@ defmodule CustomerSupportWeb.CustomerHomeLive do
 
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-                <!-- CARD 1 -->
                 <div class="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm flex flex-col items-center text-center space-y-2 hover:border-[#3B82F6] hover:shadow-md transition-all duration-200 group">
                   <div class="h-10 w-10 rounded-xl bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center font-bold group-hover:bg-[#1D4ED8] group-hover:text-white transition-colors">
                     <.icon name="hero-sparkles" class="size-5 text-[#F59E0B] group-hover:text-[#F59E0B]" />
@@ -96,7 +91,6 @@ defmodule CustomerSupportWeb.CustomerHomeLive do
                   <p class="text-[11px] text-[#64748B]">Open a ticket instantly</p>
                 </div>
 
-                <!-- CARD 2 -->
                 <div class="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm flex flex-col items-center text-center space-y-2 hover:border-[#3B82F6] hover:shadow-md transition-all duration-200 group">
                   <div class="h-10 w-10 rounded-xl bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center font-bold group-hover:bg-[#1D4ED8] group-hover:text-white transition-colors">
                     <.icon name="hero-clock" class="size-5 text-[#1D4ED8] group-hover:text-white transition-colors" />
@@ -105,7 +99,6 @@ defmodule CustomerSupportWeb.CustomerHomeLive do
                   <p class="text-[11px] text-[#64748B]">Live case updates</p>
                 </div>
 
-                <!-- CARD 3 -->
                 <div class="bg-white p-5 rounded-2xl border border-[#E2E8F0] shadow-sm flex flex-col items-center text-center space-y-2 hover:border-[#3B82F6] hover:shadow-md transition-all duration-200 group">
                   <div class="h-10 w-10 rounded-xl bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center font-bold group-hover:bg-[#1D4ED8] group-hover:text-white transition-colors">
                     <.icon name="hero-check-circle" class="size-5 text-[#1D4ED8] group-hover:text-white transition-colors" />
