@@ -2,22 +2,62 @@ defmodule CustomerSupportWeb.RequestShowLive do
   use CustomerSupportWeb, :live_view
 
   alias CustomerSupport.Requests
+  alias CustomerSupportWeb.DateTimeHelper
 
 
   def mount(%{"id" => request_id}, session, socket) do
-  customer_id = session["customer_id"]
+    customer_id = session["customer_id"]
 
-  case Requests.get_request_for_customer(request_id, customer_id) do
-    nil ->
-      {:ok,
-       socket
-       |> put_flash(:error, "Request not found.")
-       |> push_navigate(to: ~p"/requests")}
+    case Requests.get_request_for_customer(request_id, customer_id) do
+      nil ->
+        {:ok,
+        socket
+        |> put_flash(:error, "Request not found.")
+        |> push_navigate(to: ~p"/requests")}
 
-    request ->
-      {:ok, assign(socket, :request, request)}
+      request ->
+        messages =
+          Requests.list_messages_for_customer_request(
+            request_id,
+            customer_id
+          )
+
+        {:ok,
+        socket
+        |> assign(:request, request)
+        |> assign(:messages, messages)
+        |> assign(:message_body, "")}
+    end
   end
-end
+
+
+  def handle_event("update_message", %{"message" => %{"body" => body}}, socket) do
+    {:noreply, assign(socket, :message_body, body)}
+  end
+
+
+  def handle_event("send_message", %{"message" => %{"body" => body}}, socket) do
+    customer_id = socket.assigns.request.customer_id
+    request_id = socket.assigns.request.request_id
+
+    case Requests.create_customer_message(request_id, customer_id, body) do
+      {:ok, message} ->
+        {:noreply,
+        socket
+        |> update(:messages, fn messages -> messages ++ [message] end)
+        |> assign(:message_body, "")}
+
+      {:error, :unauthorized} ->
+        {:noreply,
+        socket
+        |> put_flash(:error, "You are not authorized to message this request.")}
+
+      {:error, _changeset} ->
+        {:noreply,
+        socket
+        |> put_flash(:error, "Message could not be sent.")}
+    end
+  end
 
   def render(assigns) do
     ~H"""
@@ -77,11 +117,8 @@ end
                 Description
               </div>
 
-
-              <div class="rounded-2xl border border-[#D9CBC2]/50 bg-[#F5F0E9]/50 p-6 leading-relaxed text-[#112250] text-left min-h-[160px]">
-                <p class="whitespace-pre-wrap font-normal text-base text-left">
-                  <%= @request.description %>
-                </p>
+              <div class="rounded-2xl border border-[#D9CBC2]/50 bg-[#F5F0E9]/50 p-6 leading-relaxed text-[#112250] min-h-[160px]">
+                <p class="whitespace-pre-wrap font-normal text-base text-left"><%= String.trim(@request.description || "") %></p>
               </div>
 
 
@@ -146,7 +183,7 @@ end
                   <span class="text-xs font-bold uppercase tracking-wider text-[#3C5070] block mb-1">Submitted On</span>
                   <p class="text-sm text-[#112250] font-medium flex items-center gap-2">
                     <.icon name="hero-calendar" class="size-4 text-[#3C5070]" />
-                    <%= Calendar.strftime(@request.inserted_at, "%b %d, %Y at %I:%M %p") %>
+                    <%= DateTimeHelper.format_local(@request.inserted_at) %>
                   </p>
                 </div>
 
@@ -154,7 +191,7 @@ end
                   <span class="text-xs font-bold uppercase tracking-wider text-[#3C5070] block mb-1">Last Updated</span>
                   <p class="text-sm text-[#112250] font-medium flex items-center gap-2">
                     <.icon name="hero-clock" class="size-4 text-[#3C5070]" />
-                    <%= Calendar.strftime(@request.updated_at, "%b %d, %Y at %I:%M %p") %>
+                    <%= DateTimeHelper.format_local(@request.updated_at) %>
                   </p>
                 </div>
               </div>
@@ -162,6 +199,93 @@ end
             </div>
           </div>
 
+        </div>
+
+                <!-- Conversation -->
+        <div class="rounded-3xl border border-[#D9CBC2]/60 bg-white p-8 shadow-sm">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F5F0E9]">
+              <.icon name="hero-chat-bubble-left-right" class="size-5 text-[#112250]" />
+            </div>
+
+            <div>
+              <h2 class="text-xl font-bold text-[#112250]">
+                Conversation
+              </h2>
+              <p class="text-sm text-[#3C5070]">
+                Communicate with the support team about your request.
+              </p>
+            </div>
+          </div>
+
+         <!-- Messages -->
+          <div class="space-y-4 mb-6">
+            <%= if @messages == [] do %>
+              <div class="rounded-2xl border border-dashed border-[#D9CBC2] bg-[#F5F0E9]/40 p-8 text-center">
+                <.icon name="hero-chat-bubble-left" class="size-8 mx-auto text-[#3C5070]" />
+                <p class="mt-3 text-sm font-medium text-[#3C5070]">
+                  No messages yet.
+                </p>
+                <p class="text-xs text-[#3C5070]/70 mt-1">
+                  Send a message to start the conversation.
+                </p>
+              </div>
+            <% else %>
+              <%= for message <- @messages do %>
+                <% is_customer = message.sender_type == "customer" %>
+
+                <!-- Wrapper controlling left/right alignment and max width -->
+                <div class={"flex flex-col #{if is_customer, do: "items-end", else: "items-start"}"}>
+
+                  <!-- Header: Sender & Timestamp -->
+                  <div class="flex items-center gap-2 mb-1 px-1">
+                    <span class="text-xs font-bold text-[#112250]">
+                      <%= if is_customer, do: "You", else: "Support Team" %>
+                    </span>
+                    <span class="text-[11px] text-[#3C5070]/70">
+                      <%= DateTimeHelper.format_local(message.inserted_at || @request.inserted_at) %>
+                    </span>
+                  </div>
+
+                  <!-- Chat Bubble (Fits content with max width) -->
+                  <div class={"inline-block max-w-[85%] rounded-2xl border px-4 py-2.5 shadow-sm #{if is_customer, do: "bg-[#112250] text-[#F5F0E9] border-[#112250] rounded-tr-none", else: "bg-[#F5F0E9]/80 text-[#112250] border-[#D9CBC2]/60 rounded-tl-none"}"}>
+                    <p class="text-sm whitespace-pre-wrap leading-normal"><%= String.trim(message.body || "") %></p>
+                  </div>
+
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+
+          <!-- Send Message -->
+          <.form
+            for={%{}}
+            phx-submit="send_message"
+            class="border-t border-[#D9CBC2]/40 pt-6"
+          >
+            <label class="block text-xs font-bold uppercase tracking-wider text-[#3C5070] mb-2">
+              Send a Message
+            </label>
+
+            <div class="relative flex items-end rounded-2xl border border-[#D9CBC2] bg-white p-2 focus-within:border-[#3C5070] focus-within:ring-1 focus-within:ring-[#3C5070] transition-all">
+              <textarea
+                name="message[body]"
+                rows="2"
+                placeholder="Type your message..."
+                value={@message_body}
+                phx-change="update_message"
+                class="w-full resize-none border-0 bg-transparent px-3 py-1.5 text-sm text-[#112250] placeholder-[#3C5070]/50 focus:ring-0 focus:outline-none"
+              ></textarea>
+
+              <button
+                type="submit"
+                class="ml-2 inline-flex shrink-0 items-center gap-2 rounded-xl bg-[#112250] px-5 py-2.5 text-xs font-bold text-[#F5F0E9] shadow-sm hover:bg-[#3C5070] transition-all duration-200"
+              >
+                <.icon name="hero-paper-airplane" class="size-4" />
+                <span>Send</span>
+              </button>
+            </div>
+          </.form>
         </div>
 
       <% else %>

@@ -11,6 +11,8 @@ config :customer_support,
   ecto_repos: [CustomerSupport.Repo],
   generators: [timestamp_type: :utc_datetime]
 
+  config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
+
 # Configure the endpoint
 config :customer_support, CustomerSupportWeb.Endpoint,
   url: [host: "localhost"],

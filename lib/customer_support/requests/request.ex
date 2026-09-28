@@ -18,7 +18,7 @@ defmodule CustomerSupport.Requests.Request do
     foreign_key: :request_id,
     references: :request_id
 
-    timestamps()
+    timestamps(type: :utc_datetime)
   end
 
   def changeset(request, attrs) do
