@@ -12,9 +12,11 @@ defmodule CustomerSupport.Requests.Request do
     field :status, :string, default: "Open"
     field :priority, :string, default: "Medium"
 
-    belongs_to :customer, CustomerSupport.Accounts.Customer,
-      foreign_key: :customer_id,
-      references: :customer_id
+    belongs_to :customer, CustomerSupport.Accounts.Customer, foreign_key: :customer_id, references: :customer_id
+
+    has_many :messages, CustomerSupport.Requests.Message,
+    foreign_key: :request_id,
+    references: :request_id
 
     timestamps()
   end
