@@ -27,7 +27,10 @@ defmodule CustomerSupport.Accounts.Customer do
     |> validate_required([:name, :email, :phone, :password, :password_confirmation])
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/)
     |> validate_length(:password, min: 8)
-    |> validate_confirmation(:password, required: true)
+    |> validate_confirmation(:password,
+      required: true,
+      message: "Passwords do not match"
+    )
     |> unique_constraint(:email)
     |> put_password_hash()
   end

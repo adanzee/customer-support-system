@@ -21,5 +21,6 @@ defmodule CustomerSupport.Requests.Message do
     message
     |> cast(attrs, [:request_id, :sender_type, :sender_id, :body])
     |> validate_required([:request_id, :sender_type, :sender_id, :body])
+    |> validate_length(:body, min: 1)
   end
 end
