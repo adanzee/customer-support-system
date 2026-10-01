@@ -1,26 +1,26 @@
 defmodule CustomerSupportWeb.StaffNewLive do
   use CustomerSupportWeb, :live_view
 
-  on_mount {CustomerSupportWeb.SupportAuthHook, :default}
-  on_mount {CustomerSupportWeb.SupportAuthHook, :manager}
+  alias CustomerSupport.SupportStaff
+  alias CustomerSupport.SupportStaff.Staff
 
-  alias CustomerSupport.SupportUsers
-  alias CustomerSupport.SupportUsers.SupportUser
+   on_mount {CustomerSupportWeb.ManagerAuthHook, :default}
+
 
   def mount(_params, _session, socket) do
-    changeset = SupportUser.changeset(%SupportUser{}, %{})
+    changeset = Staff.changeset(%Staff{}, %{})
 
     {:ok, assign(socket, form: to_form(changeset))}
   end
 
-  def handle_event("create_staff", %{"support_user" => params}, socket) do
-    case SupportUsers.create_staff(params) do
+  def handle_event("create_staff", %{"staff" => params}, socket) do
+    case SupportStaff.create_staff(params) do
       {:ok, _staff} ->
         {:noreply,
         socket
         |> put_flash(:info, "Support staff created successfully.")
         |> assign(
-          form: to_form(SupportUser.changeset(%SupportUser{}, %{}))
+          form: to_form(Staff.changeset(%Staff{}, %{}))
         )}
 
       {:error, changeset} ->
@@ -34,6 +34,11 @@ defmodule CustomerSupportWeb.StaffNewLive do
       <h1>Create Support Staff</h1>
 
       <.form for={@form} phx-submit="create_staff">
+
+          <div>
+          <label>Staff Identifier</label>
+          <.input field={@form[:staff_identifier]} type="text" />
+         </div>
 
         <div>
           <label>Name</label>

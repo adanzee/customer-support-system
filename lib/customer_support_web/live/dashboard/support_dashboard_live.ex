@@ -1,26 +1,20 @@
 defmodule CustomerSupportWeb.SupportDashboardLive do
   use CustomerSupportWeb, :live_view
 
-  alias CustomerSupport.SupportUsers
+  on_mount {CustomerSupportWeb.ManagerAuthHook, :default}
 
-  on_mount {CustomerSupportWeb.SupportAuthHook, :default}
-
-  def mount(_params, session, socket) do
-    support_user_id = session["support_user_id"]
-
-    support_user = SupportUsers.get_support_user(support_user_id)
-
-    {:ok, assign(socket, :support_user, support_user)}
+  def mount(_params, _session, socket) do
+    {:ok, socket}
   end
 
- def render(assigns) do
+  def render(assigns) do
     ~H"""
     <div>
       <h1>Support Dashboard</h1>
 
-      <p>Welcome, <%= @current_support_user.name %></p>
-      <p>Email: <%= @current_support_user.email %></p>
-      <p>Role: <%= @current_support_user.role %></p>
+      <p>Welcome, <%= @current_manager.name %></p>
+      <p>Email: <%= @current_manager.email %></p>
+      <p>Manager ID: <%= @current_manager.manager_identifier %></p>
     </div>
     """
   end

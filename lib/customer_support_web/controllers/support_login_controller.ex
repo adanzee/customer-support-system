@@ -1,15 +1,15 @@
 defmodule CustomerSupportWeb.SupportLoginController do
   use CustomerSupportWeb, :controller
 
-  alias CustomerSupport.SupportUsers
+  alias CustomerSupport.SupportManagers
 
   def create(conn, %{"support_user" => %{"email" => email, "password" => password}}) do
-    case SupportUsers.authenticate_support_user(email, password) do
-      {:ok, support_user} ->
+    case SupportManagers.authenticate_manager(email, password) do
+      {:ok, manager} ->
         conn
-        |> put_session(:support_user_id, support_user.support_user_id)
+        |> put_session(:manager_id, manager.manager_id)
         |> put_flash(:info, "Logged in successfully.")
-        |> redirect(to: ~p"/support/dashboard")
+        |> redirect(to: ~p"/support/manager/dashboard")
 
       {:error, :invalid_credentials} ->
         conn

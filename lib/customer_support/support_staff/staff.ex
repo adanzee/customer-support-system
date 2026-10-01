@@ -1,32 +1,31 @@
-defmodule CustomerSupport.SupportUsers.SupportUser do
+defmodule CustomerSupport.SupportStaff.Staff do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key {:support_user_id, :binary_id, autogenerate: true}
+  @primary_key {:staff_id, :binary_id, autogenerate: true}
 
-  schema "support_users" do
+  schema "support_staff" do
+    field :staff_identifier, :string
     field :name, :string
     field :email, :string
     field :password, :string, virtual: true
     field :password_hash, :string
 
-    field :role, Ecto.Enum,
-      values: [:staff, :manager]
-
     timestamps(type: :utc_datetime)
   end
 
-  def changeset(support_user, attrs) do
-    support_user
-    |> cast(attrs, [:name, :email, :password, :role])
-    |> validate_required([:name, :email, :password, :role])
+  def changeset(staff, attrs) do
+    staff
+    |> cast(attrs, [:staff_identifier, :name, :email, :password])
+    |> validate_required([:staff_identifier, :name, :email, :password])
     |> validate_length(:password, min: 8)
     |> hash_password()
+    |> unique_constraint(:staff_identifier)
     |> unique_constraint(:email)
   end
 
-  def update_changeset(support_user, attrs) do
-    support_user
+  def update_changeset(staff, attrs) do
+    staff
     |> cast(attrs, [:name, :email])
     |> validate_required([:name, :email])
     |> unique_constraint(:email)

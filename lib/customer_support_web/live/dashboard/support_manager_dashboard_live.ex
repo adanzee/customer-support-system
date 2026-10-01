@@ -1,8 +1,7 @@
 defmodule CustomerSupportWeb.SupportManagerDashboardLive do
   use CustomerSupportWeb, :live_view
 
-  on_mount {CustomerSupportWeb.SupportAuthHook, :default}
-  on_mount {CustomerSupportWeb.SupportAuthHook, :manager}
+on_mount {CustomerSupportWeb.ManagerAuthHook, :default}
 
   def mount(_params, _session, socket) do
     {:ok, socket}
@@ -13,9 +12,9 @@ defmodule CustomerSupportWeb.SupportManagerDashboardLive do
     <div>
       <h1>Support Manager Dashboard</h1>
 
-      <p>Welcome, <%= @current_support_user.name %></p>
-      <p>Email: <%= @current_support_user.email %></p>
-      <p>Role: <%= @current_support_user.role %></p>
+      <p>Welcome, <%= @current_manager.name %></p>
+      <p>Email: <%= @current_manager.email %></p>
+      <p>Manager ID: <%= @current_manager.manager_identifier %></p>
     </div>
     """
   end

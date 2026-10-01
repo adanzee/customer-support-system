@@ -1,13 +1,13 @@
 defmodule CustomerSupportWeb.StaffEditLive do
   use CustomerSupportWeb, :live_view
 
-  on_mount {CustomerSupportWeb.SupportAuthHook, :default}
-  on_mount {CustomerSupportWeb.SupportAuthHook, :manager}
+  on_mount {CustomerSupportWeb.ManagerAuthHook, :default}
 
-  alias CustomerSupport.SupportUsers
+  alias CustomerSupport.SupportStaff
+  alias CustomerSupport.SupportStaff.Staff
 
   def mount(%{"id" => id}, _session, socket) do
-    case SupportUsers.get_support_user(id) do
+    case SupportStaff.get_staff(id) do
       nil ->
         {:ok,
          socket
@@ -15,7 +15,7 @@ defmodule CustomerSupportWeb.StaffEditLive do
          |> push_navigate(to: ~p"/support/manager/staff")}
 
       staff ->
-        changeset = CustomerSupport.SupportUsers.SupportUser.update_changeset(staff, %{})
+        changeset = Staff.update_changeset(staff, %{})
 
         {:ok,
          socket
@@ -24,8 +24,8 @@ defmodule CustomerSupportWeb.StaffEditLive do
     end
   end
 
-  def handle_event("update_staff", %{"support_user" => params}, socket) do
-    case SupportUsers.update_support_user(socket.assigns.staff, params) do
+  def handle_event("update_staff", %{"staff" => params}, socket) do
+    case SupportStaff.update_staff(socket.assigns.staff, params) do
       {:ok, staff} ->
         {:noreply,
          socket
@@ -33,12 +33,7 @@ defmodule CustomerSupportWeb.StaffEditLive do
          |> assign(:staff, staff)
          |> assign(
            :form,
-           to_form(
-             CustomerSupport.SupportUsers.SupportUser.update_changeset(
-               staff,
-               %{}
-             )
-           )
+           to_form(Staff.update_changeset(staff, %{}))
          )}
 
       {:error, changeset} ->
