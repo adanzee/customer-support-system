@@ -9,3 +9,12 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+alias CustomerSupport.SupportUsers
+
+{:ok, _manager} =
+  SupportUsers.create_support_user(%{
+    name: "Support Manager",
+    email: "manager@customersupport.com",
+    password: "Manager@123",
+    role: :manager
+  })

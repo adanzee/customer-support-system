@@ -10,10 +10,15 @@ defmodule CustomerSupportWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  #customer plug
   pipeline :customer_auth do
     plug CustomerSupportWeb.Plugs.CustomerAuth
   end
 
+  #support staff plug
+  pipeline :support_auth do
+    plug CustomerSupportWeb.Plugs.SupportAuth
+  end
 
 
   pipeline :api do
@@ -30,6 +35,8 @@ defmodule CustomerSupportWeb.Router do
 
     live "/register", CustomerRegistrationLive
     live "/login", CustomerLoginLive
+    live "/support/login", SupportLoginLive
+    post "/support/login", SupportLoginController, :create
     live "/forgot-password", CustomerForgotPasswordLive
     live "/reset-password/:token", CustomerResetPasswordLive
   end
@@ -46,6 +53,16 @@ defmodule CustomerSupportWeb.Router do
     live "/change-password", CustomerChangePasswordLive
   end
 
+
+  scope "/", CustomerSupportWeb do
+    pipe_through [:browser, :support_auth]
+
+    live "/support/dashboard", SupportDashboardLive
+    live "/support/manager/dashboard", SupportManagerDashboardLive
+    live "/support/manager/staff/new", StaffNewLive
+    live "/support/manager/staff", StaffIndexLive
+    live "/support/manager/staff/:id/edit", StaffEditLive
+  end
   # Other scopes may use custom stacks.
   # scope "/api", CustomerSupportWeb do
   #   pipe_through :api
