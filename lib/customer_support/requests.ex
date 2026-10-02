@@ -151,16 +151,22 @@ defmodule CustomerSupport.Requests do
     where(query, [r, _c, _s], r.customer_id == ^customer_id)
   end
 
-  defp filter_staff(query, staff_id) when staff_id in [nil, ""], do: query
+ defp filter_staff(query, staff_id) when staff_id in [nil, ""], do: query
   defp filter_staff(query, []), do: query
 
   defp filter_staff(query, staff_ids) when is_list(staff_ids) do
-    where(query, [r, _c, _s], r.staff_id in ^staff_ids)
+    case staff_ids do
+      [""] ->
+        where(query, [r], is_nil(r.staff_id))
+
+      staff_ids ->
+        where(query, [r], r.staff_id in ^staff_ids)
+    end
   end
 
   defp filter_staff(query, staff_id) do
-    where(query, [r, _c, _s], r.staff_id == ^staff_id)
-end
+    where(query, [r], r.staff_id == ^staff_id)
+  end
 
 
 
@@ -236,5 +242,17 @@ end
             error
         end
     end
+  end
+
+  def count_requests do
+    Repo.aggregate(Request, :count, :request_id)
+  end
+
+  def count_requests_by_status(status) do
+    Repo.aggregate(
+      from(r in Request, where: r.status == ^status),
+      :count,
+      :request_id
+    )
   end
 end

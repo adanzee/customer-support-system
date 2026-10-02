@@ -4,6 +4,7 @@ defmodule CustomerSupportWeb.SupportManagerRequestShowLive do
   alias CustomerSupport.Requests
   alias CustomerSupport.Requests.Request
   alias CustomerSupport.SupportStaff
+  alias CustomerSupport.ActivityLogs
 
   on_mount {CustomerSupportWeb.ManagerAuthHook, :default}
 
@@ -30,11 +31,15 @@ defmodule CustomerSupportWeb.SupportManagerRequestShowLive do
     end
   end
 
-  def handle_event("assign_staff", %{"staff_id" => staff_id}, socket) do
-    request = socket.assigns.request
+def handle_event("assign_staff", %{"staff_id" => staff_id}, socket) do
+  IO.inspect(staff_id, label: "ASSIGN STAFF EVENT")
+  request = socket.assigns.request
+  current_manager = socket.assigns.current_manager
 
-    changeset =
-      Request.changeset(request, %{staff_id: staff_id})
+  old_staff = request.staff
+
+  changeset =
+    Request.changeset(request, %{staff_id: staff_id})
 
     case CustomerSupport.Repo.update(changeset) do
       {:ok, updated_request} ->
@@ -44,14 +49,56 @@ defmodule CustomerSupportWeb.SupportManagerRequestShowLive do
             [:customer, :staff]
           )
 
+        action =
+          cond do
+            is_nil(old_staff) and updated_request.staff ->
+              "request_assigned"
+
+            old_staff && updated_request.staff ->
+              "request_reassigned"
+
+            old_staff && is_nil(updated_request.staff) ->
+              "request_unassigned"
+
+            true ->
+              "request_updated"
+          end
+
+        description =
+          cond do
+            action == "request_assigned" ->
+              "Request #{request.request_id} was assigned to #{updated_request.staff.name}."
+
+            action == "request_reassigned" ->
+              "Request #{request.request_id} was reassigned from #{old_staff.name} to #{updated_request.staff.name}."
+
+            action == "request_unassigned" ->
+              "Request #{request.request_id} was unassigned from #{old_staff.name}."
+
+            true ->
+              "Request #{request.request_id} assignment was updated."
+          end
+
+          activity_result =
+            ActivityLogs.create_activity(%{
+              action: action,
+              description: description,
+              entity_type: "request",
+              entity_id: request.request_id,
+              actor_type: "manager",
+              actor_id: current_manager.manager_id
+            })
+
+          IO.inspect(activity_result, label: "ACTIVITY RESULT")
+
         {:noreply,
-         socket
-         |> assign(:request, updated_request)
-         |> put_flash(:info, "Staff assigned successfully.")}
+        socket
+        |> assign(:request, updated_request)
+        |> put_flash(:info, "Staff assignment updated successfully.")}
 
       {:error, _changeset} ->
         {:noreply,
-         put_flash(socket, :error, "Unable to assign staff.")}
+        put_flash(socket, :error, "Unable to assign staff.")}
     end
   end
 

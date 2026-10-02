@@ -1,9 +1,9 @@
-defmodule CustomerSupportWeb.SupportLoginController do
+defmodule CustomerSupportWeb.ManagerLoginController do
   use CustomerSupportWeb, :controller
 
   alias CustomerSupport.SupportManagers
 
-  def create(conn, %{"support_user" => %{"email" => email, "password" => password}}) do
+  def create(conn, %{"manager" => %{"email" => email, "password" => password}}) do
     case SupportManagers.authenticate_manager(email, password) do
       {:ok, manager} ->
         conn
@@ -16,5 +16,11 @@ defmodule CustomerSupportWeb.SupportLoginController do
         |> put_flash(:error, "Invalid email or password.")
         |> redirect(to: ~p"/support/login")
     end
+  end
+
+  def delete(conn, _params) do
+    conn
+    |> configure_session(drop: true)
+    |> redirect(to: ~p"/support/login")
   end
 end

@@ -6,11 +6,26 @@ defmodule CustomerSupport.SupportStaff do
   alias CustomerSupport.Requests.Request
   alias CustomerSupport.Requests.Message
   alias CustomerSupport.PubSub
+  alias CustomerSupport.ActivityLogs
 
-  def create_staff(attrs) do
-    %Staff{}
-    |> Staff.changeset(attrs)
-    |> Repo.insert()
+ def create_staff(attrs) do
+    case %Staff{}
+        |> Staff.changeset(attrs)
+        |> Repo.insert() do
+      {:ok, staff} ->
+        ActivityLogs.create_activity(%{
+          action: "staff_created",
+          description: "New support staff #{staff.name} was created.",
+          entity_type: "staff",
+          entity_id: staff.staff_id,
+          actor_type: "manager"
+        })
+
+        {:ok, staff}
+
+      error ->
+        error
+    end
   end
 
   def update_staff(staff, attrs) do
@@ -45,8 +60,22 @@ defmodule CustomerSupport.SupportStaff do
     end
   end
 
-  def delete_staff(staff) do
-    Repo.delete(staff)
+ def delete_staff(staff) do
+    case Repo.delete(staff) do
+      {:ok, deleted_staff} ->
+        ActivityLogs.create_activity(%{
+          action: "staff_deleted",
+          description: "Support staff #{deleted_staff.name} was deleted.",
+          entity_type: "staff",
+          entity_id: deleted_staff.staff_id,
+          actor_type: "manager"
+        })
+
+        {:ok, deleted_staff}
+
+      error ->
+        error
+    end
   end
 
   def list_assigned_requests(staff_id) do
@@ -98,6 +127,12 @@ defmodule CustomerSupport.SupportStaff do
         end
     end
   end
+
+  def count_staff do
+    Repo.aggregate(Staff, :count, :staff_id)
+  end
+
+
 
   def create_request_message(staff_id, request_id, body) do
     case get_assigned_request(staff_id, request_id) do

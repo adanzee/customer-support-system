@@ -10,13 +10,15 @@ defmodule CustomerSupportWeb.Router do
     plug :put_secure_browser_headers
   end
 
-  #customer plug
   pipeline :customer_auth do
     plug CustomerSupportWeb.Plugs.CustomerAuth
   end
 
-  #support manager plug
-  pipeline :support_auth do
+  pipeline :staff_auth do
+    plug CustomerSupportWeb.Plugs.StaffAuth
+  end
+
+  pipeline :manager_auth do
     plug CustomerSupportWeb.Plugs.ManagerAuth
   end
 
@@ -35,8 +37,6 @@ defmodule CustomerSupportWeb.Router do
 
     live "/register", CustomerRegistrationLive
     live "/login", CustomerLoginLive
-    live "/support/login", SupportLoginLive
-    post "/support/login", SupportLoginController, :create
     live "/forgot-password", CustomerForgotPasswordLive
     live "/reset-password/:token", CustomerResetPasswordLive
   end
@@ -54,21 +54,53 @@ defmodule CustomerSupportWeb.Router do
   end
 
 
+  # =========================
+  # Public support routes
+  # =========================
+
   scope "/", CustomerSupportWeb do
-    pipe_through [:browser, :support_auth]
+    pipe_through :browser
+
+    # Staff authentication
+    live "/support/staff/login", StaffLoginLive
     post "/support/staff/login", StaffLoginController, :create
     post "/support/staff/logout", StaffLoginController, :delete
+
+    # Manager authentication
+    live "/support/login", ManagerLoginLive
+    post "/support/login", ManagerLoginController, :create
+    post "/support/logout", ManagerLoginController, :delete
+  end
+
+
+  # =========================
+  # Manager routes
+  # =========================
+
+  scope "/", CustomerSupportWeb do
+    pipe_through [:browser, :manager_auth]
 
     live "/support/manager/dashboard", SupportManagerDashboardLive
     live "/support/manager/staff/new", StaffNewLive
     live "/support/manager/staff", StaffIndexLive
     live "/support/manager/staff/:id/edit", StaffEditLive
-    live "/support/staff/login", StaffLoginLive
-    live "/support/staff/dashboard", StaffDashboardLive
+
     live "/support/manager/requests", SupportRequestIndexLive
-    live "/support/staff/requests/:id", StaffRequestShowLive
-    live "/support/staff/requests", SupportStaffRequestIndexLive
     live "/support/manager/requests/:id", SupportManagerRequestShowLive
+    live "/support/manager/activity", ActivityIndexLive
+  end
+
+
+  # =========================
+  # Staff routes
+  # =========================
+
+  scope "/", CustomerSupportWeb do
+    pipe_through [:browser, :staff_auth]
+
+    live "/support/staff/dashboard", StaffDashboardLive
+    live "/support/staff/requests", SupportStaffRequestIndexLive
+    live "/support/staff/requests/:id", StaffRequestShowLive
   end
   # Other scopes may use custom stacks.
   # scope "/api", CustomerSupportWeb do
