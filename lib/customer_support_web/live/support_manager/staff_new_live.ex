@@ -32,6 +32,11 @@ defmodule CustomerSupportWeb.StaffNewLive do
     ~H"""
     <div>
       <h1>Create Support Staff</h1>
+      <p>
+        <.link navigate={~p"/support/manager/staff"}>
+          Back to Staff
+        </.link>
+      </p>
 
       <.form for={@form} phx-submit="create_staff">
 

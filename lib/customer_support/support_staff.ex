@@ -1,7 +1,11 @@
 defmodule CustomerSupport.SupportStaff do
+  import Ecto.Query
 
   alias CustomerSupport.Repo
   alias CustomerSupport.SupportStaff.Staff
+  alias CustomerSupport.Requests.Request
+  alias CustomerSupport.Requests.Message
+  alias CustomerSupport.PubSub
 
   def create_staff(attrs) do
     %Staff{}
@@ -37,6 +41,96 @@ defmodule CustomerSupport.SupportStaff do
           {:ok, staff}
         else
           {:error, :invalid_credentials}
+        end
+    end
+  end
+
+  def delete_staff(staff) do
+    Repo.delete(staff)
+  end
+
+  def list_assigned_requests(staff_id) do
+
+    Repo.all(
+      from r in Request,
+        where: r.staff_id == ^staff_id,
+        preload: [:customer]
+    )
+  end
+
+
+
+  def get_assigned_request(staff_id, request_id) do
+
+
+    Repo.one(
+      from r in Request,
+        where: r.request_id == ^request_id and r.staff_id == ^staff_id,
+        preload: [:customer, :messages]
+    )
+  end
+
+
+  def update_request_status(staff_id, request_id, status) do
+    case get_assigned_request(staff_id, request_id) do
+      nil ->
+        {:error, :request_not_found}
+
+      request ->
+        if Request.valid_status_transition?(request.status, status) do
+          case request
+              |> Request.changeset(%{status: status})
+              |> Repo.update() do
+            {:ok, updated_request} ->
+              Phoenix.PubSub.broadcast(
+                PubSub,
+                "request:#{request_id}",
+                {:status_updated, updated_request.status}
+              )
+
+              {:ok, updated_request}
+
+            error ->
+              error
+          end
+        else
+          {:error, :invalid_status_transition}
+        end
+    end
+  end
+
+  def create_request_message(staff_id, request_id, body) do
+    case get_assigned_request(staff_id, request_id) do
+      nil ->
+        {:error, :request_not_found}
+
+      request ->
+        case %Message{}
+            |> Message.changeset(%{
+              request_id: request.request_id,
+              sender_type: "staff",
+              sender_id: staff_id,
+              body: body
+            })
+            |> Repo.insert() do
+          {:ok, message} ->
+            topic = "request:#{request_id}"
+
+            IO.inspect(topic, label: "STAFF BROADCAST TOPIC")
+
+            result =
+              Phoenix.PubSub.broadcast(
+                PubSub,
+                topic,
+                {:new_message, message}
+              )
+
+            IO.inspect(result, label: "STAFF BROADCAST RESULT")
+
+            {:ok, message}
+
+          error ->
+            error
         end
     end
   end

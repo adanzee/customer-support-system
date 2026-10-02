@@ -59,13 +59,16 @@ defmodule CustomerSupportWeb.Router do
     post "/support/staff/login", StaffLoginController, :create
     post "/support/staff/logout", StaffLoginController, :delete
 
-    live "/support/dashboard", SupportDashboardLive
     live "/support/manager/dashboard", SupportManagerDashboardLive
     live "/support/manager/staff/new", StaffNewLive
     live "/support/manager/staff", StaffIndexLive
     live "/support/manager/staff/:id/edit", StaffEditLive
     live "/support/staff/login", StaffLoginLive
     live "/support/staff/dashboard", StaffDashboardLive
+    live "/support/manager/requests", SupportRequestIndexLive
+    live "/support/staff/requests/:id", StaffRequestShowLive
+    live "/support/staff/requests", SupportStaffRequestIndexLive
+    live "/support/manager/requests/:id", SupportManagerRequestShowLive
   end
   # Other scopes may use custom stacks.
   # scope "/api", CustomerSupportWeb do

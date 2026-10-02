@@ -26,15 +26,11 @@ defmodule CustomerSupportWeb.StaffEditLive do
 
   def handle_event("update_staff", %{"staff" => params}, socket) do
     case SupportStaff.update_staff(socket.assigns.staff, params) do
-      {:ok, staff} ->
+      {:ok, _staff} ->
         {:noreply,
-         socket
-         |> put_flash(:info, "Support staff updated successfully.")
-         |> assign(:staff, staff)
-         |> assign(
-           :form,
-           to_form(Staff.update_changeset(staff, %{}))
-         )}
+        socket
+        |> put_flash(:info, "Support staff updated successfully.")
+        |> push_navigate(to: ~p"/support/manager/staff")}
 
       {:error, changeset} ->
         {:noreply, assign(socket, :form, to_form(changeset))}
@@ -47,7 +43,6 @@ defmodule CustomerSupportWeb.StaffEditLive do
       <h1>Edit Support Staff</h1>
 
       <.form for={@form} phx-submit="update_staff">
-
         <div>
           <label>Name</label>
           <.input field={@form[:name]} type="text" />
@@ -60,6 +55,12 @@ defmodule CustomerSupportWeb.StaffEditLive do
 
         <button type="submit">Update Staff</button>
       </.form>
+
+      <p>
+        <.link navigate={~p"/support/manager/staff"}>
+          Back to Staff
+        </.link>
+      </p>
     </div>
     """
   end

@@ -15,6 +15,11 @@ defmodule CustomerSupportWeb.RequestShowLive do
          |> push_navigate(to: ~p"/requests")}
 
       request ->
+        Phoenix.PubSub.subscribe(
+          CustomerSupport.PubSub,
+          "request:#{request_id}"
+        )
+
         messages =
           Requests.list_messages_for_customer_request(
             request_id,
@@ -22,14 +27,34 @@ defmodule CustomerSupportWeb.RequestShowLive do
           )
 
         {:ok,
-         socket
-         |> assign(:request, request)
-         |> assign(:messages, messages)
-         |> assign(:message_body, "")
-         |> assign(:message_error, nil)}
+        socket
+        |> assign(:request, request)
+        |> assign(:customer_id, customer_id)
+        |> assign(:messages, messages)
+        |> assign(:message_body, "")
+        |> assign(:message_error, nil)}
     end
   end
 
+  def handle_info({:new_message, _message}, socket) do
+    customer_id = socket.assigns.customer_id
+    request_id = socket.assigns.request.request_id
+
+    messages =
+      Requests.list_messages_for_customer_request(
+        request_id,
+        customer_id
+      )
+
+    {:noreply, assign(socket, :messages, messages)}
+  end
+
+  def handle_info({:status_updated, status}, socket) do
+    {:noreply,
+    socket
+    |> assign(:request, %{socket.assigns.request | status: status})
+    |> put_flash(:info, "Request status updated to #{status}.")}
+  end
   def handle_event("update_message", %{"message" => %{"body" => body}}, socket) do
     {:noreply,
      socket
