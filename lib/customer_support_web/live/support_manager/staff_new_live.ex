@@ -3,22 +3,21 @@ defmodule CustomerSupportWeb.StaffNewLive do
 
   alias CustomerSupport.SupportStaff
   alias CustomerSupport.SupportStaff.Staff
+  alias CustomerSupport.SupportStaff
+  alias CustomerSupport.Requests
 
   on_mount {CustomerSupportWeb.ManagerAuthHook, :default}
 
-  def mount(_params, _session, socket) do
+ def mount(_params, _session, socket) do
     changeset = Staff.changeset(%Staff{}, %{})
 
     {:ok,
-     socket
-     |> assign(form: to_form(changeset))
-     # Mock stats / audit feed (replace with your Ecto queries)
-     |> assign(active_staff_count: 12)
-     |> assign(open_tickets_count: 48)
-     |> assign(recent_additions: [
-       %{name: "Sarah Jenkins", id: "STF-011", time: "2 days ago"},
-       %{name: "David Chen", id: "STF-010", time: "1 week ago"}
-     ])}
+    socket
+    |> assign(form: to_form(changeset))
+    |> assign(active_staff_count: SupportStaff.count_staff())
+    |> assign(open_tickets_count: Requests.count_requests_by_status("Open"))
+    |> assign(:show_password, false)
+    |> assign(recent_additions: SupportStaff.list_recent_staff(2))}
   end
 
   def handle_event("validate", %{"staff" => params}, socket) do
@@ -49,6 +48,10 @@ defmodule CustomerSupportWeb.StaffNewLive do
       {:error, changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
     end
+  end
+
+  def handle_event("toggle_password_visibility", _params, socket) do
+    {:noreply, update(socket, :show_password, &(!&1))}
   end
 
   def render(assigns) do
@@ -153,10 +156,24 @@ defmodule CustomerSupportWeb.StaffNewLive do
 
                 <!-- PASSWORD -->
                 <div>
-                  <div class="flex items-center justify-between mb-1">
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-[#475569]">
-                      Initial Password <span class="text-red-500">*</span>
-                    </label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#475569]">
+                    Initial Password <span class="text-red-500">*</span>
+                  </label>
+
+                  <div class="flex items-center gap-3">
+                    <button
+                      type="button"
+                      phx-click="toggle_password_visibility"
+                      class="text-[11px] font-semibold text-[#112250] hover:underline"
+                    >
+                      <%= if @show_password do %>
+                        Hide
+                      <% else %>
+                        Show
+                      <% end %>
+                    </button>
+
                     <button
                       type="button"
                       phx-click="generate_password"
@@ -165,12 +182,13 @@ defmodule CustomerSupportWeb.StaffNewLive do
                       ⚡ Auto-Generate
                     </button>
                   </div>
+                </div>
                   <.input
-                    field={@form[:password]}
-                    type="password"
-                    placeholder="At least 8 characters"
-                    class="w-full rounded-lg border border-[#CBD5E1] bg-white px-3 py-2 text-xs font-mono text-[#0F172A] focus:border-[#112250] focus:ring-1 focus:ring-[#112250]"
-                  />
+                  field={@form[:password]}
+                  type={if @show_password, do: "text", else: "password"}
+                  placeholder="At least 8 characters"
+                  class="w-full rounded-lg border border-[#CBD5E1] bg-white px-3 py-2 text-xs font-mono text-[#0F172A] focus:border-[#112250] focus:ring-1 focus:ring-[#112250]"
+                />
                 </div>
 
                 <!-- ACTIONS -->
@@ -205,11 +223,7 @@ defmodule CustomerSupportWeb.StaffNewLive do
                 <p class="mt-1 text-[10px] text-emerald-600 font-semibold">● All systems nominal</p>
               </div>
 
-              <div class="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-                <p class="text-[11px] font-semibold uppercase text-[#64748B]">Unassigned Tickets</p>
-                <p class="mt-2 text-2xl font-black text-[#0F172A]"><%= @open_tickets_count %></p>
-                <p class="mt-1 text-[10px] text-amber-600 font-semibold">Requires coverage</p>
-              </div>
+
             </div>
 
             <!-- RECENTLY ONBOARDED STAFF -->
@@ -227,10 +241,10 @@ defmodule CustomerSupportWeb.StaffNewLive do
                       </div>
                       <div>
                         <p class="text-xs font-bold text-[#0F172A]"><%= staff.name %></p>
-                        <p class="text-[10px] font-mono text-[#64748B]"><%= staff.id %></p>
+                        <p class="text-[10px] font-mono text-[#64748B]"><%= staff.staff_identifier %></p>
                       </div>
                     </div>
-                    <span class="text-[10px] text-[#94A3B8]"><%= staff.time %></span>
+                    <span class="text-[10px] text-[#94A3B8]"><%= staff.inserted_at %></span>
                   </div>
                 <% end %>
               </div>

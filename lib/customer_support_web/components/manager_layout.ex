@@ -6,7 +6,7 @@ defmodule CustomerSupportWeb.ManagerLayout do
 
   def manager_layout(assigns) do
     ~H"""
-    <div class="flex min-h-screen bg-[#F8FAFC] text-[#0F172A] antialiased">
+    <div class="flex h-screen overflow-hidden bg-[#F8FAFC] text-[#0F172A] antialiased">
 
       <.sidebar current_path={@current_path} />
 

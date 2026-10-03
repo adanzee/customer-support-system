@@ -2,6 +2,8 @@ defmodule CustomerSupportWeb.ActivityIndexLive do
   use CustomerSupportWeb, :live_view
 
   alias CustomerSupport.ActivityLogs
+  alias CustomerSupportWeb.ManagerLayout
+
 
   on_mount {CustomerSupportWeb.ManagerAuthHook, :default}
 
@@ -13,58 +15,9 @@ defmodule CustomerSupportWeb.ActivityIndexLive do
 
   def render(assigns) do
     ~H"""
-    <div class="h-screen w-screen overflow-hidden bg-[#F8FAFC] text-[#0F172A] flex font-sans selection:bg-[#3B82F6] selection:text-white">
+    <ManagerLayout.manager_layout current_path={~p"/support/manager/activity"}>
 
-      <!-- SIDEBAR NAV -->
-      <aside class="w-64 bg-gradient-to-b from-[#0F172A] via-[#1E293B] to-[#0F172A] text-white h-full p-6 flex flex-col justify-between border-r border-[#1E293B] shadow-xl shrink-0">
-        <div class="space-y-6">
-          <!-- BRAND HEADER -->
-          <div class="flex items-center gap-3 pb-5 border-b border-white/10">
-            <div class="h-3 w-3 rounded-full bg-[#F59E0B] ring-4 ring-[#F59E0B]/20"></div>
-            <span class="text-xs font-mono font-bold tracking-[0.2em] uppercase text-white">
-              SUPPORTDESK
-            </span>
-          </div>
 
-          <!-- NAVIGATION LINKS -->
-          <nav class="space-y-2">
-            <.link
-              navigate={~p"/support/manager/dashboard"}
-              class="block text-[#94A3B8] hover:text-white hover:bg-white/5 rounded-xl px-4 py-3 font-medium text-xs tracking-wider transition-all"
-            >
-              Dashboard
-            </.link>
-
-            <.link
-              navigate={~p"/support/manager/requests"}
-              class="block text-[#94A3B8] hover:text-white hover:bg-white/5 rounded-xl px-4 py-3 font-medium text-xs tracking-wider transition-all"
-            >
-              Requests
-            </.link>
-
-            <.link
-              navigate={~p"/support/manager/staff"}
-              class="block text-[#94A3B8] hover:text-white hover:bg-white/5 rounded-xl px-4 py-3 font-medium text-xs tracking-wider transition-all"
-            >
-              Staff
-            </.link>
-
-            <.link
-              navigate={~p"/support/manager/activity"}
-              class="flex items-center justify-between bg-[#1E40AF] text-white rounded-xl px-4 py-3 font-semibold text-xs uppercase tracking-wider shadow-md shadow-[#1E40AF]/20 transition-all"
-            >
-              <span>Activity Log</span>
-              <div class="h-1.5 w-1.5 rounded-full bg-[#F59E0B]"></div>
-            </.link>
-          </nav>
-        </div>
-
-        <!-- SIDEBAR FOOTER ACCENT -->
-        <div class="pt-4 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-[#64748B]">
-          <span>GATEWAY v2.4</span>
-          <div class="h-2 w-2 rotate-45 bg-[#F59E0B]"></div>
-        </div>
-      </aside>
 
       <!-- MAIN CONTENT AREA -->
       <main class="flex-1 h-full flex flex-col justify-between min-w-0 overflow-hidden">
@@ -77,14 +30,7 @@ defmodule CustomerSupportWeb.ActivityIndexLive do
             </span>
           </div>
 
-          <div class="flex items-center gap-4">
-            <.link
-              navigate={~p"/support/manager/dashboard"}
-              class="px-3.5 py-1.5 rounded-lg bg-[#F8FAFC] border border-[#CBD5E1] text-[#0F172A] hover:bg-[#0F172A] hover:text-white transition-all text-[11px] font-mono font-bold uppercase tracking-wider"
-            >
-              Back to Dashboard
-            </.link>
-          </div>
+
         </header>
 
         <!-- ACTIVITY LOG CONTENT CONTAINER -->
@@ -196,7 +142,8 @@ defmodule CustomerSupportWeb.ActivityIndexLive do
 
       </main>
 
-    </div>
+
+    </ManagerLayout.manager_layout>
     """
   end
 end

@@ -46,10 +46,13 @@ defmodule CustomerSupport.SupportStaff do
     Repo.get_by(Staff, email: email)
   end
 
-  def authenticate_staff(email, password) do
+ def authenticate_staff(email, password) do
     case get_staff_by_email(email) do
       nil ->
         {:error, :invalid_credentials}
+
+      %{status: "disabled"} ->
+        {:error, :account_disabled}
 
       staff ->
         if Bcrypt.verify_pass(password, staff.password_hash) do
@@ -87,7 +90,29 @@ defmodule CustomerSupport.SupportStaff do
     )
   end
 
+  def disable_staff(staff_id) do
+    case get_staff(staff_id) do
+      nil ->
+        {:error, :not_found}
 
+      staff ->
+        staff
+        |> Ecto.Changeset.change(status: "disabled")
+        |> Repo.update()
+    end
+  end
+
+  def enable_staff(staff_id) do
+    case get_staff(staff_id) do
+      nil ->
+        {:error, :not_found}
+
+      staff ->
+        staff
+        |> Ecto.Changeset.change(status: "active")
+        |> Repo.update()
+    end
+  end
 
   def get_assigned_request(staff_id, request_id) do
 
@@ -97,6 +122,13 @@ defmodule CustomerSupport.SupportStaff do
         where: r.request_id == ^request_id and r.staff_id == ^staff_id,
         preload: [:customer, :messages]
     )
+  end
+
+  def list_recent_staff(limit \\ 2) do
+    Staff
+    |> order_by([s], desc: s.inserted_at)
+    |> limit(^limit)
+    |> Repo.all()
   end
 
 

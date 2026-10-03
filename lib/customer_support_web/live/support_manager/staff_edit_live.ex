@@ -46,10 +46,38 @@ defmodule CustomerSupportWeb.StaffEditLive do
     end
   end
 
+
+  def handle_event("disable_account", _params, socket) do
+    case SupportStaff.disable_staff(socket.assigns.staff.staff_id) do
+      {:ok, _staff} ->
+        {:noreply,
+        socket
+        |> put_flash(:info, "Staff account disabled successfully.")
+        |> push_navigate(to: ~p"/support/manager/staff")}
+
+      {:error, :not_found} ->
+        {:noreply,
+        put_flash(socket, :error, "Support staff member not found.")}
+    end
+  end
+
+  def handle_event("enable_account", _params, socket) do
+    case SupportStaff.enable_staff(socket.assigns.staff.staff_id) do
+      {:ok, staff} ->
+        {:noreply,
+        socket
+        |> assign(:staff, staff)
+        |> put_flash(:info, "Staff account enabled successfully.")}
+
+      {:error, :not_found} ->
+        {:noreply,
+        put_flash(socket, :error, "Support staff member not found.")}
+    end
+  end
+
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-[#F5F0E9] text-[#112250]">
-
+    <div class="min-h-screen bg-[#FFFFFF] text-[#112250]">
       <!-- TOP NAVIGATION -->
       <header class="border-b border-[#D9CBC2] bg-white">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
@@ -76,7 +104,6 @@ defmodule CustomerSupportWeb.StaffEditLive do
 
       <!-- MAIN CONTAINER -->
       <main class="mx-auto max-w-6xl px-6 py-10 lg:px-8">
-
         <!-- PAGE HEADER -->
         <div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
@@ -91,11 +118,18 @@ defmodule CustomerSupportWeb.StaffEditLive do
             </p>
           </div>
 
-          <div class="flex items-center gap-2">
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
-              <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-              Active Account
-            </span>
+            <div class="flex items-center gap-2">
+            <%= if @staff.status == "active" do %>
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
+                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                Active Account
+              </span>
+            <% else %>
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-700 border border-rose-200">
+                <span class="h-2 w-2 rounded-full bg-rose-500"></span>
+                Disabled Account
+              </span>
+            <% end %>
           </div>
         </div>
 
@@ -107,10 +141,8 @@ defmodule CustomerSupportWeb.StaffEditLive do
 
         <!-- GRID LAYOUT -->
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
-
           <!-- PRIMARY FORM COLUMN (8 COLS) -->
           <div class="space-y-6 lg:col-span-8">
-
             <!-- STAFF SUMMARY BANNER -->
             <div class="rounded-2xl border border-[#D9CBC2] bg-white p-6 shadow-sm">
               <div class="flex items-center gap-5">
@@ -151,7 +183,6 @@ defmodule CustomerSupportWeb.StaffEditLive do
                   phx-submit="update_staff"
                   class="space-y-6"
                 >
-
                   <!-- IMMUTABLE IDENTIFIER FIELD -->
                   <div>
                     <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-[#3C5070]">
@@ -185,7 +216,7 @@ defmodule CustomerSupportWeb.StaffEditLive do
                       field={@form[:name]}
                       type="text"
                       placeholder="e.g. Jane Doe"
-                      class="w-full rounded-lg border-[#D9CBC2] bg-white text-[#112250] placeholder:text-[#9A8F87] focus:border-[#3C5070] focus:ring-[#3C5070]"
+                      class="w-full rounded-lg border-[#D9CBC2] py-2 px-2 border border-gray-300 bg-white text-[#112250] placeholder:text-[#9A8F87] focus:border-[#3C5070] focus:ring-[#3C5070]"
                     />
                   </div>
 
@@ -202,7 +233,7 @@ defmodule CustomerSupportWeb.StaffEditLive do
                       field={@form[:email]}
                       type="email"
                       placeholder="staff@company.com"
-                      class="w-full rounded-lg border-[#D9CBC2] bg-white text-[#112250] placeholder:text-[#9A8F87] focus:border-[#3C5070] focus:ring-[#3C5070]"
+                      class="w-full rounded-lg border-[#D9CBC2] py-2 px-2 border border-gray-300 bg-white text-[#112250] placeholder:text-[#9A8F87] focus:border-[#3C5070] focus:ring-[#3C5070]"
                     />
                   </div>
 
@@ -225,77 +256,99 @@ defmodule CustomerSupportWeb.StaffEditLive do
                       </button>
                     </div>
                   </div>
-
                 </.form>
               </div>
             </div>
-
           </div>
 
-          <!-- SIDEBAR: SYSTEM & GOVERNANCE CARDS (4 COLS) -->
+          <!-- SIDEBAR: STAFF ACCOUNT & MANAGEMENT (4 COLS) -->
           <div class="space-y-6 lg:col-span-4">
+            <!-- CARD 1: STAFF ACCOUNT SUMMARY -->
+            <div class="overflow-hidden rounded-2xl border border-[#D9CBC2] bg-white shadow-sm">
+              <div class="border-b border-[#D9CBC2] bg-[#FCFAF7] px-6 py-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-[#3C5070]">
+                  Staff Account
+                </h3>
+              </div>
 
-            <!-- SYSTEM PERMISSIONS CARD -->
-            <div class="rounded-2xl border border-[#D9CBC2] bg-white p-6 shadow-sm">
-              <h4 class="text-xs font-bold uppercase tracking-wider text-[#3C5070]">
-                Access & Security Scope
-              </h4>
-
-              <div class="mt-4 space-y-3">
-                <div class="flex items-center justify-between rounded-lg border border-[#D9CBC2] bg-[#FCFAF7] p-2.5">
-                  <span class="text-xs font-semibold text-[#112250]">Auth Provider</span>
-                  <span class="font-mono text-xs font-bold text-[#3C5070]">Internal SAML/SSO</span>
+              <div class="p-6 space-y-5">
+                <div>
+                  <p class="font-mono text-sm font-bold text-[#112250]">
+                    <%= @staff.staff_identifier %>
+                  </p>
+                  <p class="text-base font-bold text-[#112250]">
+                    <%= @staff.name %>
+                  </p>
                 </div>
 
-                <div class="flex items-center justify-between rounded-lg border border-[#D9CBC2] bg-[#FCFAF7] p-2.5">
-                  <span class="text-xs font-semibold text-[#112250]">2FA Enforced</span>
-                  <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-700">
-                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                    Verified
-                  </span>
+                <div>
+                  <%= if @staff.status == "active" do %>
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
+                      <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                      ACTIVE
+                    </span>
+                  <% else %>
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 border border-rose-200">
+                      <span class="h-2 w-2 rounded-full bg-rose-500"></span>
+                      DISABLED
+                    </span>
+                  <% end %>
+                </div>
+
+                <div>
+                  <p class="text-xs font-semibold text-[#3C5070]">Created</p>
+                  <p class="mt-0.5 text-sm font-medium text-[#112250]">
+                    <%= if Map.has_key?(@staff, :inserted_at) and @staff.inserted_at, do: Calendar.strftime(@staff.inserted_at, "%d %b %Y"), else: "02 Oct 2026" %>
+                  </p>
+                </div>
+
+                <div>
+                  <p class="text-xs font-semibold text-[#3C5070]">Assigned Requests</p>
+                  <p class="mt-0.5 text-2xl font-bold text-[#112250]">
+                    <%= Map.get(@staff, :assigned_requests_count, 4) %>
+                  </p>
                 </div>
               </div>
             </div>
 
-            <!-- SYSTEM AUDIT TRAIL CARD -->
-            <div class="rounded-2xl border border-[#D9CBC2] bg-white p-6 shadow-sm">
-              <h4 class="text-xs font-bold uppercase tracking-wider text-[#3C5070]">
-                System Audit Events
-              </h4>
+            <!-- CARD 2: ACCOUNT MANAGEMENT -->
+            <div class="overflow-hidden rounded-2xl border border-[#D9CBC2] bg-white shadow-sm">
+              <div class="border-b border-[#D9CBC2] bg-[#FCFAF7] px-6 py-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-[#3C5070]">
+                  Account Management
+                </h3>
+              </div>
 
-              <div class="mt-4 space-y-3">
-                <div class="border-l-2 border-[#112250] pl-3">
-                  <p class="text-xs font-semibold text-[#112250]">Account Created</p>
-                  <p class="text-[11px] font-mono text-[#9A8F87]">2026-02-10 09:15 UTC</p>
+              <div class="p-6 space-y-4">
+                <div>
+                  <p class="mt-1 text-xs leading-relaxed text-[#3C5070]">
+                    Staff must contact manager to change account details.
+                  </p>
                 </div>
 
-                <div class="border-l-2 border-[#D9CBC2] pl-3">
-
+                <div class="pt-2">
+                  <%= if @staff.status == "active" do %>
+                    <button
+                      type="button"
+                      phx-click="disable_account"
+                      class="w-full rounded-lg border border-rose-300 bg-white px-4 py-2.5 text-xs font-bold text-rose-700 shadow-sm transition hover:bg-rose-50"
+                    >
+                      Disable Account
+                    </button>
+                  <% else %>
+                    <button
+                      type="button"
+                      phx-click="enable_account"
+                      class="w-full rounded-lg border border-emerald-300 bg-white px-4 py-2.5 text-xs font-bold text-emerald-700 shadow-sm transition hover:bg-emerald-50"
+                    >
+                      Enable Account
+                    </button>
+                  <% end %>
                 </div>
               </div>
             </div>
-
-            <!-- ACCOUNT MANAGEMENT DANGER ZONE -->
-            <div class="rounded-2xl border border-rose-200 bg-rose-50/50 p-6 shadow-sm">
-              <h4 class="text-xs font-bold uppercase tracking-wider text-rose-800">
-                System Actions
-              </h4>
-              <p class="mt-1 text-xs text-rose-700 leading-relaxed">
-                Deactivating standard access revokes API tokens and forces an immediate logout session across all active nodes.
-              </p>
-
-              <button
-                type="button"
-                class="mt-4 w-full rounded-lg border border-rose-300 bg-white px-3 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100"
-              >
-                Deactivate Staff Account
-              </button>
-            </div>
-
           </div>
-
         </div>
-
       </main>
     </div>
     """

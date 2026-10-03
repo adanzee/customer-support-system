@@ -28,6 +28,13 @@ defmodule CustomerSupport.Requests.Request do
     |> validate_required([:title, :description, :category, :customer_id])
   end
 
+  def priority_changeset(request, attrs) do
+    request
+    |> cast(attrs, [:priority])
+    |> validate_required([:priority])
+    |> validate_inclusion(:priority, ["Low", "Medium", "High", "Critical"])
+  end
+
   def valid_status_transition?(current_status, new_status) do
     case current_status do
       "Open" ->

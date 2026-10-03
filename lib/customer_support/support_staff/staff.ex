@@ -10,13 +10,14 @@ defmodule CustomerSupport.SupportStaff.Staff do
     field :email, :string
     field :password, :string, virtual: true
     field :password_hash, :string
+    field :status, :string, default: "active"
 
     timestamps(type: :utc_datetime)
   end
 
   def changeset(staff, attrs) do
     staff
-    |> cast(attrs, [:staff_identifier, :name, :email, :password])
+    |> cast(attrs, [:staff_identifier, :name, :email, :password, :status])
     |> validate_required([:staff_identifier, :name, :email, :password])
     |> validate_length(:password, min: 8)
     |> hash_password()

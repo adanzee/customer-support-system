@@ -59,6 +59,14 @@ defmodule CustomerSupportWeb.ManagerSidebar do
     """
   end
 
+  defp nav_class(current_path, "/support/manager/requests" = path) do
+    if current_path == path or String.starts_with?(current_path, path <> "/") do
+      "flex items-center justify-between rounded-xl bg-blue-600 px-4 py-3 text-xs font-semibold text-white shadow-sm"
+    else
+      "flex items-center gap-3 rounded-xl px-4 py-3 text-xs font-semibold text-slate-400 transition hover:bg-slate-800/50 hover:text-white"
+    end
+  end
+
   defp nav_class(current_path, path) do
     if current_path == path do
       "flex items-center justify-between rounded-xl bg-blue-600 px-4 py-3 text-xs font-semibold text-white shadow-sm"

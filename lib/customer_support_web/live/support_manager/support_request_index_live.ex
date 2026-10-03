@@ -6,68 +6,67 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
   alias CustomerSupport.Requests.Request
   alias CustomerSupport.SupportStaff
   alias CustomerSupport.ActivityLogs
+  alias CustomerSupportWeb.ManagerLayout
 
   on_mount {CustomerSupportWeb.ManagerAuthHook, :default}
 
   def mount(_params, _session, socket) do
-    requests =
-      Requests.search_and_filter_requests("", %{})
-
+    requests = Requests.search_and_filter_requests("", %{})
     staff = SupportStaff.list_staff()
 
     {:ok,
-     socket
-     |> assign(:requests, requests)
-     |> assign(:staff, staff)
-     |> assign(:filters, %{
-       status: [],
-       priority: [],
-       category: [],
-       staff_id: [],
-       date_from: nil,
-       date_to: nil
-     })}
-  end
-
-  def handle_event("apply_filters", params, socket) do
-    filters = %{
-      status: Map.get(params, "status", []),
-      priority: Map.get(params, "priority", []),
-      category: Map.get(params, "category", []),
-      staff_id: Map.get(params, "staff_id", []),
-      date_from: Map.get(params, "date_from"),
-      date_to: Map.get(params, "date_to")
-    }
-
-    search_query = Map.get(params, "search_query", "")
-
-    requests =
-      Requests.search_and_filter_requests(search_query, filters)
-
-    {:noreply,
-     socket
-     |> assign(:filters, filters)
-     |> assign(:requests, requests)}
-  end
-
-  def handle_event("quick_filter", %{"status" => "all"}, socket) do
-    filters = %{
+    socket
+    |> assign(:requests, requests)
+    |> assign(:staff, staff)
+    |> assign(:open_dropdown, nil) # Tracks currently opened filter popover
+    |> assign(:filters, %{
       status: [],
       priority: [],
       category: [],
       staff_id: [],
       date_from: nil,
       date_to: nil
+    })}
+  end
+
+  def handle_event("toggle_dropdown", %{"filter" => filter}, socket) do
+    new_dropdown = if socket.assigns.open_dropdown == filter, do: nil, else: filter
+    {:noreply, assign(socket, :open_dropdown, new_dropdown)}
+  end
+
+  def handle_event("close_dropdowns", _params, socket) do
+    {:noreply, assign(socket, :open_dropdown, nil)}
+  end
+
+  def handle_event("apply_filters", params, socket) do
+    filters = %{
+      status: normalize_filter(params["status"]),
+      priority: normalize_filter(params["priority"]),
+      category: normalize_filter(params["category"]),
+      staff_id: normalize_filter(params["staff_id"]),
+      date_from: blank_to_nil(params["date_from"]),
+      date_to: blank_to_nil(params["date_to"])
     }
 
     requests =
       Requests.search_and_filter_requests("", filters)
 
     {:noreply,
-     socket
-     |> assign(:filters, filters)
-     |> assign(:requests, requests)}
+    socket
+    |> assign(:filters, filters)
+    |> assign(:requests, requests)
+    |> assign(:open_dropdown, nil)}
   end
+
+    defp normalize_filter(nil), do: []
+    defp normalize_filter(""), do: []
+    defp normalize_filter(value) when is_list(value), do: Enum.reject(value, &(&1 == ""))
+    defp normalize_filter(value), do: [value]
+
+    defp blank_to_nil(nil), do: nil
+    defp blank_to_nil(""), do: nil
+    defp blank_to_nil(value), do: value
+
 
   def handle_event("quick_filter", %{"status" => status}, socket) do
     filters = %{
@@ -88,24 +87,7 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
      |> assign(:requests, requests)}
   end
 
-  def handle_event("quick_filter", %{"staff" => "unassigned"}, socket) do
-    filters = %{
-      status: [],
-      priority: [],
-      category: [],
-      staff_id: [""],
-      date_from: nil,
-      date_to: nil
-    }
 
-    requests =
-      Requests.search_and_filter_requests("", filters)
-
-    {:noreply,
-     socket
-     |> assign(:filters, filters)
-     |> assign(:requests, requests)}
-  end
 
   def handle_event("clear_filters", _params, socket) do
     filters = %{
@@ -207,63 +189,9 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
     end
   end
 
-  def render(assigns) do
+def render(assigns) do
   ~H"""
-  <div class="flex min-h-screen bg-[#F8FAFC] text-[#0F172A] antialiased">
-
-    <!-- SIDEBAR -->
-    <aside class="flex w-64 shrink-0 flex-col justify-between bg-[#0F172A] p-6 text-white">
-      <div>
-        <!-- BRAND -->
-        <div class="mb-8 flex items-center gap-3 border-b border-slate-800 pb-8">
-          <div class="h-3 w-3 rounded-full bg-amber-500"></div>
-
-          <span class="text-sm font-bold uppercase tracking-widest">
-            SUPPORTDESK
-          </span>
-        </div>
-
-        <!-- NAVIGATION -->
-        <nav class="space-y-2">
-
-          <.link
-            navigate={~p"/support/manager/dashboard"}
-            class="flex items-center gap-3 rounded-xl px-4 py-3 text-xs font-semibold text-slate-400 transition hover:bg-slate-800/50 hover:text-white"
-          >
-            Dashboard
-          </.link>
-
-          <.link
-            navigate={~p"/support/manager/requests"}
-            class="flex items-center justify-between rounded-xl bg-blue-600 px-4 py-3 text-xs font-semibold text-white shadow-sm"
-          >
-            <span>Requests</span>
-            <span class="h-2 w-2 rounded-full bg-amber-400"></span>
-          </.link>
-
-          <.link
-            navigate={~p"/support/manager/staff"}
-            class="flex items-center gap-3 rounded-xl px-4 py-3 text-xs font-semibold text-slate-400 transition hover:bg-slate-800/50 hover:text-white"
-          >
-            Staff Management
-          </.link>
-
-          <.link
-            navigate={~p"/support/manager/activity"}
-            class="flex items-center gap-3 rounded-xl px-4 py-3 text-xs font-semibold text-slate-400 transition hover:bg-slate-800/50 hover:text-white"
-          >
-            Activity
-          </.link>
-
-        </nav>
-      </div>
-
-      <!-- SIDEBAR FOOTER -->
-      <div class="flex items-center justify-between border-t border-slate-800 pt-6 text-[10px] text-slate-500">
-        <span>MANAGER PORTAL</span>
-        <span class="h-2 w-2 rotate-45 bg-amber-500"></span>
-      </div>
-    </aside>
+   <ManagerLayout.manager_layout current_path={~p"/support/manager/requests"}>
 
     <!-- MAIN -->
     <div class="flex min-w-0 flex-1 flex-col">
@@ -331,7 +259,7 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
           </div>
 
           <!-- SUMMARY -->
-          <div class="grid grid-cols-3 gap-3">
+          <div class="grid grid-cols-4 gap-3">
 
             <div class="min-w-[110px] rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm">
               <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">
@@ -350,7 +278,12 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
 
               <p class="mt-1 text-2xl font-black text-amber-900">
                 <%= Enum.count(@requests, fn request ->
-                  request.status in ["Open", "In Progress", "Waiting for Customer", "Reopened"]
+                  request.status in [
+                    "Open",
+                    "In Progress",
+                    "Waiting for Customer",
+                    "Reopened"
+                  ]
                 end) %>
               </p>
             </div>
@@ -362,7 +295,19 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
 
               <p class="mt-1 text-2xl font-black text-rose-900">
                 <%= Enum.count(@requests, fn request ->
-                  request.priority in ["High", "Critical"]
+                  request.priority in ["High"]
+                end) %>
+              </p>
+            </div>
+
+            <div class="min-w-[110px] rounded-xl border border-rose-200 bg-rose-50 p-3.5 shadow-sm">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-rose-800">
+                Critical
+              </p>
+
+              <p class="mt-1 text-2xl font-black text-rose-900">
+                <%= Enum.count(@requests, fn request ->
+                  request.priority in ["Critical"]
                 end) %>
               </p>
             </div>
@@ -371,13 +316,15 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
         </div>
 
         <!-- FILTER CARD -->
-        <div class="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
 
-          <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+          <!-- CARD HEADER -->
+          <div class="rounded-t-2xl border-b border-slate-100 bg-slate-50/50 px-6 py-4">
 
             <div class="flex flex-wrap items-center justify-between gap-4">
 
               <div class="flex items-center gap-2">
+
                 <svg
                   class="h-4 w-4 text-slate-500"
                   fill="none"
@@ -392,9 +339,10 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
                   />
                 </svg>
 
-                <h2 class="text-sm font-bold uppercase tracking-wider text-slate-900">
-                  Filter & Search
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800">
+                  Filter Requests
                 </h2>
+
               </div>
 
               <div class="flex items-center gap-3">
@@ -402,252 +350,366 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
                 <button
                   type="button"
                   phx-click="clear_filters"
-                  class="text-xs font-semibold text-slate-500 underline-offset-4 transition hover:text-slate-900 hover:underline"
+                  class="text-xs font-semibold text-slate-500 transition hover:text-slate-900 hover:underline"
                 >
                   Reset Filters
                 </button>
 
-                <span class="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-900">
+                <span class="rounded-full border border-slate-200/80 bg-slate-100 px-3 py-1 text-xs font-bold text-slate-800">
                   <%= length(@requests) %> Matches
                 </span>
 
               </div>
+
             </div>
           </div>
 
-          <.form
-            id="request-filters"
-            for={%{}}
-            phx-submit="apply_filters"
-            class="p-6"
-          >
+          <!-- FORM -->
+            <.form
+              id="request-filters"
+              for={%{}}
+              phx-submit="apply_filters"
+              class="p-6"
+            >
 
-            <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 
-              <!-- STATUS -->
-              <details class="group rounded-xl border border-slate-200 bg-slate-50 p-3.5 transition hover:border-slate-400">
-                <summary class="cursor-pointer list-none text-xs font-bold uppercase tracking-wider text-slate-900">
-                  <div class="flex items-center justify-between">
-                    <span>
-                      Status
-                      <%= if length(@filters.status) > 0 do %>
-                        (<%= length(@filters.status) %>)
-                      <% end %>
-                    </span>
+              <!-- STATUS DROPDOWN -->
+              <div class="relative">
 
-                    <svg
-                      class="h-4 w-4 text-slate-500 transition group-open:rotate-180"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-                </summary>
+                <button
+                  type="button"
+                  phx-click="toggle_dropdown"
+                  phx-value-filter="status"
+                  class={[
+                    "flex w-full items-center justify-between rounded-xl border bg-slate-50/50 px-4 py-3 text-xs font-bold text-slate-800 transition focus:outline-none focus:ring-2 focus:ring-slate-400",
+                    if(
+                      @open_dropdown == "status",
+                      do: "border-slate-400 bg-white shadow-sm",
+                      else: "border-slate-200 hover:border-slate-300"
+                    )
+                  ]}
+                >
+                  <span class="flex items-center gap-1.5 uppercase tracking-wider">
+                    Status
 
-                <div class="mt-3 space-y-2.5 border-t border-slate-200 pt-3">
+                    <%= if length(@filters.status) > 0 do %>
+                      <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white">
+                        <%= length(@filters.status) %>
+                      </span>
+                    <% end %>
+                  </span>
 
-                  <%= for status <- [
-                    "Open",
-                    "In Progress",
-                    "Waiting for Customer",
-                    "Resolved",
-                    "Closed",
-                    "Reopened"
-                  ] do %>
-
-                    <label class="flex cursor-pointer items-center gap-2.5 text-xs font-medium text-slate-600 hover:text-slate-900">
-
-                      <input
-                        type="checkbox"
-                        name="status[]"
-                        value={status}
-                        checked={status in @filters.status}
-                        class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500"
-                      />
-
-                      <span><%= status %></span>
-
-                    </label>
-
-                  <% end %>
-
-                </div>
-              </details>
-
-              <!-- PRIORITY -->
-              <details class="group rounded-xl border border-slate-200 bg-slate-50 p-3.5 transition hover:border-slate-400">
-                <summary class="cursor-pointer list-none text-xs font-bold uppercase tracking-wider text-slate-900">
-                  <div class="flex items-center justify-between">
-
-                    <span>
-                      Priority
-                      <%= if length(@filters.priority) > 0 do %>
-                        (<%= length(@filters.priority) %>)
-                      <% end %>
-                    </span>
-
-                    <svg
-                      class="h-4 w-4 text-slate-500 transition group-open:rotate-180"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-
-                  </div>
-                </summary>
-
-                <div class="mt-3 space-y-2.5 border-t border-slate-200 pt-3">
-
-                  <%= for priority <- ["Low", "Medium", "High", "Critical"] do %>
-
-                    <label class="flex cursor-pointer items-center gap-2.5 text-xs font-medium text-slate-600 hover:text-slate-900">
-
-                      <input
-                        type="checkbox"
-                        name="priority[]"
-                        value={priority}
-                        checked={priority in @filters.priority}
-                        class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500"
-                      />
-
-                      <span><%= priority %></span>
-
-                    </label>
-
-                  <% end %>
-
-                </div>
-              </details>
-
-              <!-- CATEGORY -->
-              <details class="group rounded-xl border border-slate-200 bg-slate-50 p-3.5 transition hover:border-slate-400">
-                <summary class="cursor-pointer list-none text-xs font-bold uppercase tracking-wider text-slate-900">
-                  <div class="flex items-center justify-between">
-
-                    <span>
-                      Category
-                      <%= if length(@filters.category) > 0 do %>
-                        (<%= length(@filters.category) %>)
-                      <% end %>
-                    </span>
-
-                    <svg
-                      class="h-4 w-4 text-slate-500 transition group-open:rotate-180"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-
-                  </div>
-                </summary>
-
-                <div class="mt-3 space-y-2.5 border-t border-slate-200 pt-3">
-
-                  <%= for category <- ["Technical", "Billing", "Account", "General"] do %>
-
-                    <label class="flex cursor-pointer items-center gap-2.5 text-xs font-medium text-slate-600 hover:text-slate-900">
-
-                      <input
-                        type="checkbox"
-                        name="category[]"
-                        value={category}
-                        checked={category in @filters.category}
-                        class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500"
-                      />
-
-                      <span><%= category %></span>
-
-                    </label>
-
-                  <% end %>
-
-                </div>
-              </details>
-
-              <!-- DATE -->
-              <details class="group rounded-xl border border-slate-200 bg-slate-50 p-3.5 transition hover:border-slate-400">
-                <summary class="cursor-pointer list-none text-xs font-bold uppercase tracking-wider text-slate-900">
-
-                  <div class="flex items-center justify-between">
-
-                    <span>Date Range</span>
-
-                    <svg
-                      class="h-4 w-4 text-slate-500 transition group-open:rotate-180"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-
-                  </div>
-                </summary>
-
-                <div class="mt-3 space-y-3 border-t border-slate-200 pt-3">
-
-                  <div>
-                    <label class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                      From
-                    </label>
-
-                    <input
-                      type="date"
-                      name="date_from"
-                      value={@filters.date_from || ""}
-                      class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                  <svg
+                    class={[
+                      "h-4 w-4 text-slate-500 transition-transform duration-200",
+                      if(@open_dropdown == "status", do: "rotate-180")
+                    ]}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M19 9l-7 7-7-7"
                     />
+                  </svg>
+                </button>
+
+                <div
+                  phx-click-away="close_dropdowns"
+                  class={[
+                    "absolute left-0 top-full z-30 mt-2 w-full rounded-xl border border-slate-200 bg-white p-4 shadow-xl",
+                    if(@open_dropdown != "status", do: "hidden")
+                  ]}
+                >
+                  <div class="space-y-2">
+
+                    <%= for status <- [
+                      "Open",
+                      "In Progress",
+                      "Waiting for Customer",
+                      "Resolved",
+                      "Closed",
+                      "Reopened"
+                    ] do %>
+
+                      <label class="flex cursor-pointer items-center gap-2.5 rounded-lg p-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50">
+
+                        <input
+                          type="checkbox"
+                          name="status[]"
+                          value={status}
+                          checked={status in @filters.status}
+                          class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500"
+                        />
+
+                        <span>
+                          <%= status %>
+                        </span>
+
+                      </label>
+
+                    <% end %>
+
                   </div>
-
-                  <div>
-                    <label class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                      To
-                    </label>
-
-                    <input
-                      type="date"
-                      name="date_to"
-                      value={@filters.date_to || ""}
-                      class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-                    />
-                  </div>
-
                 </div>
-              </details>
+
+              </div>
+
+              <!-- PRIORITY DROPDOWN -->
+              <div class="relative">
+
+                <button
+                  type="button"
+                  phx-click="toggle_dropdown"
+                  phx-value-filter="priority"
+                  class={[
+                    "flex w-full items-center justify-between rounded-xl border bg-slate-50/50 px-4 py-3 text-xs font-bold text-slate-800 transition focus:outline-none focus:ring-2 focus:ring-slate-400",
+                    if(
+                      @open_dropdown == "priority",
+                      do: "border-slate-400 bg-white shadow-sm",
+                      else: "border-slate-200 hover:border-slate-300"
+                    )
+                  ]}
+                >
+                  <span class="flex items-center gap-1.5 uppercase tracking-wider">
+                    Priority
+
+                    <%= if length(@filters.priority) > 0 do %>
+                      <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white">
+                        <%= length(@filters.priority) %>
+                      </span>
+                    <% end %>
+                  </span>
+
+                  <svg
+                    class={[
+                      "h-4 w-4 text-slate-500 transition-transform duration-200",
+                      if(@open_dropdown == "priority", do: "rotate-180")
+                    ]}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                <div
+                  phx-click-away="close_dropdowns"
+                  class={[
+                    "absolute left-0 top-full z-30 mt-2 w-full rounded-xl border border-slate-200 bg-white p-4 shadow-xl",
+                    if(@open_dropdown != "priority", do: "hidden")
+                  ]}
+                >
+                  <div class="space-y-2">
+
+                    <%= for priority <- ["Low", "Medium", "High", "Critical"] do %>
+
+                      <label class="flex cursor-pointer items-center gap-2.5 rounded-lg p-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50">
+
+                        <input
+                          type="checkbox"
+                          name="priority[]"
+                          value={priority}
+                          checked={priority in @filters.priority}
+                          class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500"
+                        />
+
+                        <span>
+                          <%= priority %>
+                        </span>
+
+                      </label>
+
+                    <% end %>
+
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- CATEGORY DROPDOWN -->
+              <div class="relative">
+
+                <button
+                  type="button"
+                  phx-click="toggle_dropdown"
+                  phx-value-filter="category"
+                  class={[
+                    "flex w-full items-center justify-between rounded-xl border bg-slate-50/50 px-4 py-3 text-xs font-bold text-slate-800 transition focus:outline-none focus:ring-2 focus:ring-slate-400",
+                    if(
+                      @open_dropdown == "category",
+                      do: "border-slate-400 bg-white shadow-sm",
+                      else: "border-slate-200 hover:border-slate-300"
+                    )
+                  ]}
+                >
+                  <span class="flex items-center gap-1.5 uppercase tracking-wider">
+                    Category
+
+                    <%= if length(@filters.category) > 0 do %>
+                      <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white">
+                        <%= length(@filters.category) %>
+                      </span>
+                    <% end %>
+                  </span>
+
+                  <svg
+                    class={[
+                      "h-4 w-4 text-slate-500 transition-transform duration-200",
+                      if(@open_dropdown == "category", do: "rotate-180")
+                    ]}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                <div
+                  phx-click-away="close_dropdowns"
+                  class={[
+                    "absolute left-0 top-full z-30 mt-2 w-full rounded-xl border border-slate-200 bg-white p-4 shadow-xl",
+                    if(@open_dropdown != "category", do: "hidden")
+                  ]}
+                >
+                  <div class="space-y-2">
+
+                    <%= for category <- [
+                      "Technical",
+                      "Billing",
+                      "Account",
+                      "General"
+                    ] do %>
+
+                      <label class="flex cursor-pointer items-center gap-2.5 rounded-lg p-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50">
+
+                        <input
+                          type="checkbox"
+                          name="category[]"
+                          value={category}
+                          checked={category in @filters.category}
+                          class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500"
+                        />
+
+                        <span>
+                          <%= category %>
+                        </span>
+
+                      </label>
+
+                    <% end %>
+
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- DATE RANGE -->
+              <div class="relative">
+
+                <button
+                  type="button"
+                  phx-click="toggle_dropdown"
+                  phx-value-filter="date"
+                  class={[
+                    "flex w-full items-center justify-between rounded-xl border bg-slate-50/50 px-4 py-3 text-xs font-bold text-slate-800 transition focus:outline-none focus:ring-2 focus:ring-slate-400",
+                    if(
+                      @open_dropdown == "date",
+                      do: "border-slate-400 bg-white shadow-sm",
+                      else: "border-slate-200 hover:border-slate-300"
+                    )
+                  ]}
+                >
+                  <span class="uppercase tracking-wider">
+                    Date Range
+
+                    <%= if @filters.date_from || @filters.date_to do %>
+                      <span class="ml-1 inline-flex h-2 w-2 rounded-full bg-blue-600"></span>
+                    <% end %>
+                  </span>
+
+                  <svg
+                    class={[
+                      "h-4 w-4 text-slate-500 transition-transform duration-200",
+                      if(@open_dropdown == "date", do: "rotate-180")
+                    ]}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                <div
+                  phx-click-away="close_dropdowns"
+                  class={[
+                    "absolute right-0 top-full z-30 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-4 shadow-xl",
+                    if(@open_dropdown != "date", do: "hidden")
+                  ]}
+                >
+                  <div class="space-y-3">
+
+                    <div>
+                      <label class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        From
+                      </label>
+
+                      <input
+                        type="date"
+                        name="date_from"
+                        value={@filters.date_from || ""}
+                        class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        To
+                      </label>
+
+                      <input
+                        type="date"
+                        name="date_to"
+                        value={@filters.date_to || ""}
+                        class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                      />
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
 
             </div>
 
-            <div class="mt-5 flex justify-end">
+            <!-- APPLY BUTTON -->
+            <div class="mt-6 flex justify-end border-t border-slate-100 pt-4">
 
               <button
                 type="submit"
-                class="rounded-lg bg-[#0F172A] px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800"
+                class="rounded-xl bg-[#0F172A] px-6 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800 active:scale-95"
               >
                 Apply Filters
               </button>
@@ -708,7 +770,6 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
               <table class="min-w-full text-left">
 
                 <thead class="border-b border-slate-200 bg-slate-50">
-
                   <tr>
 
                     <th class="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
@@ -740,7 +801,6 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
                     </th>
 
                   </tr>
-
                 </thead>
 
                 <tbody class="divide-y divide-slate-200">
@@ -775,7 +835,8 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
                         <div class="flex items-center gap-3">
 
                           <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-white">
-                            <%= String.first(request.customer.name || "?") |> String.upcase() %>
+                            <%= String.first(request.customer.name || "?")
+                            |> String.upcase() %>
                           </div>
 
                           <div>
@@ -871,7 +932,10 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
                             class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                           >
 
-                            <option value="" selected={is_nil(request.staff_id)}>
+                            <option
+                              value=""
+                              selected={is_nil(request.staff_id)}
+                            >
                               Unassigned
                             </option>
 
@@ -900,6 +964,7 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
                           class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm transition hover:bg-slate-900 hover:text-white"
                         >
                           View
+
                           <svg
                             class="h-3 w-3"
                             fill="none"
@@ -913,6 +978,7 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
                               d="M9 5l7 7-7 7"
                             />
                           </svg>
+
                         </.link>
 
                       </td>
@@ -933,7 +999,8 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
 
       </main>
     </div>
-  </div>
+    </ManagerLayout.manager_layout>
+
   """
 end
 end

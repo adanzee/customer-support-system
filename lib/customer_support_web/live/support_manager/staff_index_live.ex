@@ -2,7 +2,7 @@ defmodule CustomerSupportWeb.StaffIndexLive do
   use CustomerSupportWeb, :live_view
 
   alias CustomerSupport.SupportStaff
-
+  alias CustomerSupportWeb.ManagerLayout
   on_mount {CustomerSupportWeb.ManagerAuthHook, :default}
 
   def mount(_params, _session, socket) do
@@ -34,48 +34,7 @@ defmodule CustomerSupportWeb.StaffIndexLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex min-h-screen bg-[#F8FAFC] text-[#0F172A] antialiased">
-      <!-- LEFT SIDEBAR -->
-      <aside class="w-64 shrink-0 bg-[#0F172A] text-white flex flex-col justify-between p-6">
-        <div>
-          <!-- BRAND / LOGO HEADER -->
-          <div class="flex items-center gap-3 pb-8 mb-6 border-b border-slate-800">
-            <div class="h-3 w-3 rounded-full bg-amber-500"></div>
-            <span class="font-bold text-sm tracking-widest uppercase text-white">SUPPORTDESK</span>
-          </div>
-
-          <!-- NAVIGATION LINKS -->
-          <nav class="space-y-2">
-            <.link
-              navigate={~p"/support/manager/dashboard"}
-              class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/50 transition"
-            >
-              <span>Dashboard</span>
-            </.link>
-
-            <.link
-              navigate={~p"/support/manager/requests"}
-              class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/50 transition"
-            >
-              <span>Requests</span>
-            </.link>
-
-            <.link
-              navigate={~p"/support/manager/staff"}
-              class="flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold text-white bg-blue-600 shadow-sm"
-            >
-              <span>Staff Management</span>
-              <span class="h-2 w-2 rounded-full bg-amber-400"></span>
-            </.link>
-          </nav>
-        </div>
-
-        <!-- SIDEBAR FOOTER -->
-        <div class="pt-6 border-t border-slate-800 text-[10px] text-slate-500 flex items-center justify-between">
-          <span>GATEWAY v2.4</span>
-          <span class="h-2 w-2 bg-amber-500 transform rotate-45"></span>
-        </div>
-      </aside>
+    <ManagerLayout.manager_layout current_path={~p"/support/manager/staff"}>
 
       <!-- MAIN CONTENT WRAPPER -->
       <div class="flex-1 flex flex-col min-w-0">
@@ -91,12 +50,6 @@ defmodule CustomerSupportWeb.StaffIndexLive do
           </div>
 
           <div class="flex items-center gap-3">
-            <.link
-              navigate={~p"/support/manager/dashboard"}
-              class="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-            >
-              Dashboard
-            </.link>
 
             <.link
               navigate={~p"/support/manager/staff/new"}
@@ -220,8 +173,12 @@ defmodule CustomerSupportWeb.StaffIndexLive do
                       </th>
 
                       <th class="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                        Staff ID
-                      </th>
+                          Staff ID
+                        </th>
+
+                        <th class="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                          Status
+                        </th>
 
                       <th class="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                         Joined
@@ -267,6 +224,21 @@ defmodule CustomerSupportWeb.StaffIndexLive do
                           <span class="rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 font-mono text-[11px] font-bold text-slate-800">
                             <%= staff.staff_identifier %>
                           </span>
+                        </td>
+
+                        <!-- STATUS -->
+                        <td class="whitespace-nowrap px-6 py-4">
+                          <%= if staff.status == "active" do %>
+                            <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+                              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                              Active
+                            </span>
+                          <% else %>
+                            <span class="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-bold text-rose-700">
+                              <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
+                              Disabled
+                            </span>
+                          <% end %>
                         </td>
 
                         <!-- CREATED -->
@@ -343,7 +315,8 @@ defmodule CustomerSupportWeb.StaffIndexLive do
           </div>
         </main>
       </div>
-    </div>
+
+    </ManagerLayout.manager_layout>
     """
   end
 end

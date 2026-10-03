@@ -168,7 +168,17 @@ defmodule CustomerSupport.Requests do
     where(query, [r], r.staff_id == ^staff_id)
   end
 
+  def update_request_priority(request_id, priority) do
+    case get_request(request_id) do
+      nil ->
+        {:error, :not_found}
 
+      request ->
+        request
+        |> Request.priority_changeset(%{priority: priority})
+        |> Repo.update()
+    end
+  end
 
 
   def list_requests_by_customer(customer_id) do
