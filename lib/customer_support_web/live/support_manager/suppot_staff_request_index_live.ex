@@ -5,28 +5,37 @@ defmodule CustomerSupportWeb.SupportStaffRequestIndexLive do
 
   on_mount {CustomerSupportWeb.StaffAuthHook, :default}
 
-  def mount(_params, _session, socket) do
-    staff_id = socket.assigns.current_staff.staff_id
 
-    filters = %{
-      status: [],
-      priority: [],
-      category: [],
-      date_from: nil,
-      date_to: nil
-    }
+def mount(_params, _session, socket) do
+  staff_id = socket.assigns.current_staff.staff_id
 
-    requests =
-      Requests.search_and_filter_staff_requests(
-        staff_id,
-        filters
-      )
-
-    {:ok,
-     socket
-     |> assign(:requests, requests)
-     |> assign(:filters, filters)}
+  if connected?(socket) do
+    Phoenix.PubSub.subscribe(
+      CustomerSupport.PubSub,
+      "staff:#{staff_id}"
+    )
   end
+
+  filters = %{
+    status: [],
+    priority: [],
+    category: [],
+    date_from: nil,
+    date_to: nil
+  }
+
+  requests =
+    Requests.search_and_filter_staff_requests(
+      staff_id,
+      filters
+    )
+
+  {:ok,
+   socket
+   |> assign(:requests, requests)
+   |> assign(:filters, filters)}
+end
+
 
   def handle_event("apply_filters", params, socket) do
     filters = %{
@@ -49,6 +58,20 @@ defmodule CustomerSupportWeb.SupportStaffRequestIndexLive do
      |> assign(:requests, requests)}
   end
 
+  def handle_info({:request_assignment_changed, request_id}, socket) do
+    IO.inspect(request_id, label: "REAL-TIME ASSIGNMENT EVENT")
+
+    staff_id = socket.assigns.current_staff.staff_id
+    filters = socket.assigns.filters
+
+    requests =
+      Requests.search_and_filter_staff_requests(
+        staff_id,
+        filters
+      )
+
+    {:noreply, assign(socket, :requests, requests)}
+  end
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-[#F5F0E9] text-[#112250]">

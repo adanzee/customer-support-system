@@ -7,6 +7,8 @@ defmodule CustomerSupportWeb.SupportManagerRequestShowLive do
   alias CustomerSupport.ActivityLogs
   alias CustomerSupport.Repo
   alias CustomerSupportWeb.ManagerLayout
+  alias CustomerSupport.Mailers.StaffMailer
+  alias CustomerSupport.Mailer
 
   on_mount {CustomerSupportWeb.ManagerAuthHook, :default}
 
@@ -52,6 +54,15 @@ defmodule CustomerSupportWeb.SupportManagerRequestShowLive do
             updated_request,
             [:customer, :staff]
           )
+
+           if updated_request.staff do
+              result =
+                updated_request.staff
+                |> StaffMailer.request_assigned_email(updated_request)
+                |> Mailer.deliver()
+
+              IO.inspect(result, label: "STAFF ASSIGNMENT EMAIL")
+            end
 
         action =
           cond do

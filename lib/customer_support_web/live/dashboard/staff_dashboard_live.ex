@@ -1,17 +1,41 @@
 defmodule CustomerSupportWeb.StaffDashboardLive do
   use CustomerSupportWeb, :live_view
 
+
   on_mount {CustomerSupportWeb.StaffAuthHook, :default}
 
-  def mount(_params, _session, socket) do
-    requests =
-      CustomerSupport.SupportStaff.list_assigned_requests(
-        socket.assigns.current_staff.staff_id
-      )
+def mount(_params, _session, socket) do
+  staff_id = socket.assigns.current_staff.staff_id
 
-    {:ok, assign(socket, :requests, requests)}
+  if connected?(socket) do
+    topic = "staff:#{staff_id}"
+
+    IO.inspect(topic, label: "STAFF SUBSCRIBED TO")
+
+    Phoenix.PubSub.subscribe(
+      CustomerSupport.PubSub,
+      topic
+    )
   end
 
+  requests =
+    CustomerSupport.SupportStaff.list_assigned_requests(
+      staff_id
+    )
+
+  {:ok, assign(socket, :requests, requests)}
+end
+
+def handle_info({:request_assignment_changed, request_id}, socket) do
+  IO.inspect(request_id, label: "REAL-TIME ASSIGNMENT EVENT")
+
+  requests =
+    CustomerSupport.SupportStaff.list_assigned_requests(
+      socket.assigns.current_staff.staff_id
+    )
+
+  {:noreply, assign(socket, :requests, requests)}
+end
   def render(assigns) do
     ~H"""
     <div class="min-h-dvh w-full bg-[#F5F0E9] text-[#112250] font-sans selection:bg-[#E0C58F] selection:text-[#112250]">

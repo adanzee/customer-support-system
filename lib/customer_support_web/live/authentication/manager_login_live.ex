@@ -2,9 +2,16 @@ defmodule CustomerSupportWeb.ManagerLoginLive do
   use CustomerSupportWeb, :live_view
 
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok, assign(socket, show_password: false, password: "")}
   end
 
+  def handle_event("validate", %{"manager" => %{"password" => password}}, socket) do
+    {:noreply, assign(socket, :password, password)}
+  end
+
+  def handle_event("toggle_password_visibility", _params, socket) do
+    {:noreply, update(socket, :show_password, &(!&1))}
+  end
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans selection:bg-[#3B82F6] selection:text-white">
@@ -66,6 +73,7 @@ defmodule CustomerSupportWeb.ManagerLoginLive do
             <form
               action={~p"/support/login"}
               method="post"
+              phx-change="validate"
               class="space-y-5"
             >
               <input
@@ -94,19 +102,36 @@ defmodule CustomerSupportWeb.ManagerLoginLive do
                 </div>
               </div>
 
+
               <!-- PASSWORD INPUT -->
               <div class="space-y-1.5 text-left">
-                <label
-                  for="manager-password"
-                  class="block text-[11px] font-mono font-bold uppercase tracking-wider text-[#475569]"
-                >
-                  Password
-                </label>
+                <div class="flex items-center justify-between">
+                  <label
+                    for="manager-password"
+                    class="block text-[11px] font-mono font-bold uppercase tracking-wider text-[#475569]"
+                  >
+                    Password
+                  </label>
+
+                  <button
+                    type="button"
+                    phx-click="toggle_password_visibility"
+                    class="text-[11px] font-semibold text-[#112250] hover:underline"
+                  >
+                    <%= if @show_password do %>
+                      Hide
+                    <% else %>
+                      Show
+                    <% end %>
+                  </button>
+                </div>
+
                 <div class="relative">
                   <input
                     id="manager-password"
-                    type="password"
+                    type={if @show_password, do: "text", else: "password"}
                     name="manager[password]"
+                    value={@password}
                     required
                     placeholder="••••••••"
                     class="w-full px-4 py-3 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#0F172A] text-sm placeholder-[#94A3B8] focus:outline-none focus:border-[#1E40AF] focus:bg-white focus:ring-4 focus:ring-[#1E40AF]/10 transition-all duration-200"

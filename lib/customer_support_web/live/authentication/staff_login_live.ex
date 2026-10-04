@@ -2,7 +2,15 @@ defmodule CustomerSupportWeb.StaffLoginLive do
   use CustomerSupportWeb, :live_view
 
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok, assign(socket, show_password: false, password: "")}
+  end
+
+  def handle_event("validate", %{"staff" => %{"password" => password}}, socket) do
+    {:noreply, assign(socket, :password, password)}
+  end
+
+  def handle_event("toggle_password_visibility", _params, socket) do
+    {:noreply, update(socket, :show_password, &(!&1))}
   end
 
   def render(assigns) do
@@ -46,6 +54,7 @@ defmodule CustomerSupportWeb.StaffLoginLive do
             for={%{}}
             action="/support/staff/login"
             method="post"
+            phx-change="validate"
             class="space-y-5"
           >
             <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
@@ -65,21 +74,40 @@ defmodule CustomerSupportWeb.StaffLoginLive do
               />
             </div>
 
-            <!-- PASSWORD -->
-            <div class="space-y-1.5">
-              <label for="staff-password" class="block text-[10px] font-mono font-bold uppercase tracking-wider text-[#D9CBC2]">
-                Password
-              </label>
-              <input
-                id="staff-password"
-                type="password"
-                name="staff[password]"
-                required
-                placeholder="••••••••••••"
-                class="w-full rounded-xl border border-[#3C5070] bg-[#112250]/70 px-4 py-3 text-xs text-[#F5F0E9] placeholder-[#3C5070] transition-all outline-none focus:border-[#E0C58F] focus:ring-1 focus:ring-[#E0C58F]"
-              />
-            </div>
 
+            <!-- PASSWORD -->
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <label
+                    for="staff-password"
+                    class="block text-[10px] font-mono font-bold uppercase tracking-wider text-[#D9CBC2]"
+                  >
+                    Password
+                  </label>
+
+                  <button
+                    type="button"
+                    phx-click="toggle_password_visibility"
+                    class="text-[10px] font-semibold text-[#E0C58F] hover:underline cursor-pointer"
+                  >
+                    <%= if @show_password do %>
+                      Hide
+                    <% else %>
+                      Show
+                    <% end %>
+                  </button>
+                </div>
+
+                <input
+                  id="staff-password"
+                  type={if @show_password, do: "text", else: "password"}
+                  name="staff[password]"
+                  value={@password}
+                  required
+                  placeholder="••••••••••••"
+                  class="w-full rounded-xl border border-[#3C5070] bg-[#112250]/70 px-4 py-3 text-xs text-[#F5F0E9] placeholder-[#3C5070] transition-all outline-none focus:border-[#E0C58F] focus:ring-1 focus:ring-[#E0C58F]"
+                />
+              </div>
             <!-- SUBMIT -->
             <div class="pt-3">
               <button

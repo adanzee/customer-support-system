@@ -7,6 +7,8 @@ defmodule CustomerSupportWeb.StaffLoginController do
     case SupportStaff.authenticate_staff(email, password) do
       {:ok, staff} ->
         conn
+        |> delete_session(:customer_id)
+        |> delete_session(:manager_id)
         |> put_session(:staff_id, staff.staff_id)
         |> put_flash(:info, "Logged in successfully.")
         |> redirect(to: "/support/staff/dashboard")
@@ -14,6 +16,11 @@ defmodule CustomerSupportWeb.StaffLoginController do
       {:error, :account_disabled} ->
         conn
         |> put_flash(:error, "Your account has been disabled. Please contact your manager.")
+        |> redirect(to: "/support/staff/login")
+
+      {:error, :not_team_member} ->
+        conn
+        |> put_flash(:error, "You are not a team member.")
         |> redirect(to: "/support/staff/login")
 
       {:error, :invalid_credentials} ->

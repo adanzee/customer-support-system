@@ -1,6 +1,8 @@
 defmodule CustomerSupport.SupportManagers do
   alias CustomerSupport.Repo
   alias CustomerSupport.SupportManagers.SupportManager
+  alias CustomerSupport.Mailers.StaffMailer
+  alias CustomerSupport.Mailer
 
   def create_manager(attrs) do
     %SupportManager{}

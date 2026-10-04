@@ -7,6 +7,8 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
   alias CustomerSupport.SupportStaff
   alias CustomerSupport.ActivityLogs
   alias CustomerSupportWeb.ManagerLayout
+  alias CustomerSupport.Mailers.StaffMailer
+  alias CustomerSupport.Mailer
 
   on_mount {CustomerSupportWeb.ManagerAuthHook, :default}
 
@@ -108,7 +110,7 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
      |> assign(:requests, requests)}
   end
 
-  def handle_event(
+    def handle_event(
         "assign_staff",
         %{"request_id" => request_id, "staff_id" => staff_id},
         socket
@@ -132,6 +134,53 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
           else
             SupportStaff.get_staff(staff_id)
           end
+
+        updated_request =
+          Repo.get!(Request, request_id)
+
+        cond do
+          old_staff && new_staff ->
+            # Reassigned: notify both old and new staff
+            old_staff
+            |> StaffMailer.request_unassigned_email(updated_request)
+            |> Mailer.deliver()
+
+            new_staff
+            |> StaffMailer.request_reassigned_email(updated_request)
+            |> Mailer.deliver()
+
+          old_staff && is_nil(new_staff) ->
+            # Unassigned: notify previous staff
+            old_staff
+            |> StaffMailer.request_unassigned_email(updated_request)
+            |> Mailer.deliver()
+
+          is_nil(old_staff) && new_staff ->
+            # Newly assigned: notify new staff
+            new_staff
+            |> StaffMailer.request_assigned_email(updated_request)
+            |> Mailer.deliver()
+
+          true ->
+            :ok
+        end
+
+        # Notify affected staff portals in real time
+        if old_staff do
+          Phoenix.PubSub.broadcast(
+            CustomerSupport.PubSub,
+            "staff:#{old_staff.staff_id}",
+            {:request_assignment_changed, request_id}
+          )
+        end
+
+        if new_staff do
+          Phoenix.PubSub.broadcast(
+            CustomerSupport.PubSub,
+            "staff:#{new_staff.staff_id}",
+            {:request_assignment_changed, request_id}
+          )
+        end
 
         action =
           cond do
@@ -179,16 +228,15 @@ defmodule CustomerSupportWeb.SupportRequestIndexLive do
           )
 
         {:noreply,
-         socket
-         |> assign(:requests, requests)
-         |> put_flash(:info, "Staff assignment updated successfully.")}
+        socket
+        |> assign(:requests, requests)
+        |> put_flash(:info, "Staff assignment updated successfully.")}
 
       {:error, _changeset} ->
         {:noreply,
-         put_flash(socket, :error, "Unable to update staff assignment.")}
+        put_flash(socket, :error, "Unable to update staff assignment.")}
     end
   end
-
 def render(assigns) do
   ~H"""
    <ManagerLayout.manager_layout current_path={~p"/support/manager/requests"}>

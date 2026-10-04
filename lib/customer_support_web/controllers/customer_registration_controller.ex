@@ -16,11 +16,12 @@ defmodule CustomerSupportWeb.CustomerRegistrationController do
         |> put_flash(:info, "Account created successfully.")
         |> redirect(to: ~p"/login")
 
-      {:error, _changeset} ->
+      {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
-        |> put_flash(:error, "Please correct the registration details.")
-        |> redirect(to: ~p"/register")
+        |> put_flash(:error, "Passwords do not match.")
+        |> put_view(CustomerSupportWeb.CustomerRegistrationLive)
+        |> Phoenix.Controller.render(:render, changeset: changeset)
     end
   end
 end

@@ -7,7 +7,11 @@ defmodule CustomerSupportWeb.CustomerEditProfileLive do
     customer_id = session["customer_id"]
     customer = Accounts.get_customer(customer_id)
 
-    {:ok, assign(socket, :customer, customer)}
+    {:ok,
+     assign(socket,
+       customer: customer,
+       changeset: nil
+     )}
   end
 
   def handle_event("update_profile", %{"customer" => params}, socket) do
@@ -20,14 +24,16 @@ defmodule CustomerSupportWeb.CustomerEditProfileLive do
          |> push_navigate(to: ~p"/profile")}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, :changeset, changeset)}
+        changeset = Map.put(changeset, :action, :validate)
+
+        {:noreply,
+         assign(socket, :changeset, changeset)}
     end
   end
 
   def render(assigns) do
     ~H"""
     <div class="max-w-4xl mx-auto space-y-8 py-4 font-sans">
-
 
       <div class="relative overflow-hidden rounded-3xl bg-[#112250] p-8 md:p-10 text-[#F5F0E9] shadow-xl">
 
@@ -36,7 +42,7 @@ defmodule CustomerSupportWeb.CustomerEditProfileLive do
 
         <div class="relative z-10">
           <.link
-            navigate={~p"/profile/edit"}
+            navigate={~p"/profile"}
             class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#E0C58F] hover:text-[#F5F0E9] transition-colors mb-4"
           >
             <.icon name="hero-arrow-left" class="size-4" />
@@ -53,19 +59,19 @@ defmodule CustomerSupportWeb.CustomerEditProfileLive do
         </div>
       </div>
 
-
       <div class="overflow-hidden rounded-3xl border border-[#D9CBC2]/60 bg-white shadow-sm">
-
 
         <div class="border-b border-[#D9CBC2]/40 bg-[#F5F0E9]/60 px-6 py-5 sm:px-8">
           <div class="flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#112250] text-[#E0C58F] shadow-sm">
               <.icon name="hero-user" class="size-5" />
             </div>
+
             <div>
               <h2 class="text-lg font-bold text-[#112250]">
                 Personal Information
               </h2>
+
               <p class="text-xs text-[#3C5070]">
                 Keep your contact details up to date.
               </p>
@@ -73,11 +79,10 @@ defmodule CustomerSupportWeb.CustomerEditProfileLive do
           </div>
         </div>
 
-        <!-- CARD BODY & FORM -->
         <div class="p-6 sm:p-8">
           <form phx-submit="update_profile" class="space-y-6">
 
-            <!-- NAME FIELD -->
+            <!-- NAME -->
             <div class="space-y-2">
               <label for="customer_name" class="block text-sm font-bold text-[#112250]">
                 Full Name <span class="text-rose-500">*</span>
@@ -88,13 +93,25 @@ defmodule CustomerSupportWeb.CustomerEditProfileLive do
                   <.icon name="hero-user" class="size-4" />
                 </div>
 
-                <input id="customer_name" type="text"  name="customer[name]"  value={@customer.name}  required placeholder="e.g. Jane Doe"
+                <input
+                  id="customer_name"
+                  type="text"
+                  name="customer[name]"
+                  value={@customer.name}
+                  required
+                  placeholder="e.g. Jane Doe"
                   class="w-full rounded-xl border border-[#D9CBC2] bg-[#F5F0E9]/40 pl-11 pr-4 py-3.5 text-sm text-[#112250] placeholder-[#3C5070]/50 shadow-inner outline-none transition-all duration-200 focus:border-[#112250] focus:bg-white focus:ring-2 focus:ring-[#E0C58F]"
                 />
               </div>
+
+              <%= if @changeset && @changeset.errors[:name] do %>
+                <p class="text-xs text-red-600">
+                  {elem(@changeset.errors[:name], 0)}
+                </p>
+              <% end %>
             </div>
 
-            <!-- EMAIL FIELD -->
+            <!-- EMAIL -->
             <div class="space-y-2">
               <label for="customer_email" class="block text-sm font-bold text-[#112250]">
                 Email Address <span class="text-rose-500">*</span>
@@ -105,12 +122,25 @@ defmodule CustomerSupportWeb.CustomerEditProfileLive do
                   <.icon name="hero-envelope" class="size-4" />
                 </div>
 
-                <input id="customer_email" type="email" name="customer[email]" value={@customer.email} required placeholder="e.g. name@example.com" class="w-full rounded-xl border border-[#D9CBC2] bg-[#F5F0E9]/40 pl-11 pr-4 py-3.5 text-sm text-[#112250] placeholder-[#3C5070]/50 shadow-inner outline-none transition-all duration-200 focus:border-[#112250] focus:bg-white focus:ring-2 focus:ring-[#E0C58F]"
+                <input
+                  id="customer_email"
+                  type="email"
+                  name="customer[email]"
+                  value={@customer.email}
+                  required
+                  placeholder="e.g. name@example.com"
+                  class="w-full rounded-xl border border-[#D9CBC2] bg-[#F5F0E9]/40 pl-11 pr-4 py-3.5 text-sm text-[#112250] placeholder-[#3C5070]/50 shadow-inner outline-none transition-all duration-200 focus:border-[#112250] focus:bg-white focus:ring-2 focus:ring-[#E0C58F]"
                 />
               </div>
+
+              <%= if @changeset && @changeset.errors[:email] do %>
+                <p class="text-xs text-red-600">
+                  {elem(@changeset.errors[:email], 0)}
+                </p>
+              <% end %>
             </div>
 
-            <!-- PHONE FIELD -->
+            <!-- PHONE -->
             <div class="space-y-2">
               <label for="customer_phone" class="block text-sm font-bold text-[#112250]">
                 Phone Number <span class="text-rose-500">*</span>
@@ -121,13 +151,27 @@ defmodule CustomerSupportWeb.CustomerEditProfileLive do
                   <.icon name="hero-phone" class="size-4" />
                 </div>
 
-                <input id="customer_phone" type="tel" name="customer[phone]" value={@customer.phone} required placeholder="e.g. +1 (555) 000-0000"
-                  class="w-full rounded-xl border border-[#D9CBC2] bg-[#F5F0E9]/40 pl-11 pr-4 py-3.5 text-sm text-[#112250] placeholder-[#3C5070]/50 shadow-inner outline-none transition-all duration-200 focus:border-[#112250] focus:bg-white focus:ring-2 focus:ring-[#E0C58F]"/>
+                <input
+                  id="customer_phone"
+                  type="tel"
+                  name="customer[phone]"
+                  value={@customer.phone}
+                  required
+                  placeholder="e.g. +1 (555) 000-0000"
+                  class="w-full rounded-xl border border-[#D9CBC2] bg-[#F5F0E9]/40 pl-11 pr-4 py-3.5 text-sm text-[#112250] placeholder-[#3C5070]/50 shadow-inner outline-none transition-all duration-200 focus:border-[#112250] focus:bg-white focus:ring-2 focus:ring-[#E0C58F]"
+                />
               </div>
+
+              <%= if @changeset && @changeset.errors[:phone] do %>
+                <p class="text-xs text-red-600">
+                  {elem(@changeset.errors[:phone], 0)}
+                </p>
+              <% end %>
             </div>
 
-
+            <!-- ACTIONS -->
             <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-6 border-t border-[#D9CBC2]/40">
+
               <.link
                 navigate={~p"/profile"}
                 class="inline-flex items-center justify-center gap-2 rounded-xl border border-[#D9CBC2] bg-[#F5F0E9]/80 px-6 py-3 font-semibold text-sm text-[#112250] hover:bg-[#D9CBC2]/50 active:scale-[0.98] transition-all duration-200"
@@ -142,13 +186,12 @@ defmodule CustomerSupportWeb.CustomerEditProfileLive do
                 <.icon name="hero-check" class="size-4 stroke-[2.5]" />
                 Save Changes
               </button>
+
             </div>
 
           </form>
         </div>
-
       </div>
-
     </div>
     """
   end

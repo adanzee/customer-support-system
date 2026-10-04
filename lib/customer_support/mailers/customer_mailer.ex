@@ -216,7 +216,7 @@ defmodule CustomerSupport.Mailers.CustomerMailer do
     """)
   end
 
-  def staff_replied_email(customer, request) do
+  def staff_replied_email(customer, request, body) do
     new()
     |> to(customer.email)
     |> from(@from)
@@ -231,6 +231,20 @@ defmodule CustomerSupport.Mailers.CustomerMailer do
 
     #{request_details(request)}
 
+    <p><strong>Support staff message</strong></p>
+
+    <div style="
+      background-color: #f4f4f5;
+      border-left: 4px solid #3b82f6;
+      padding: 14px 16px;
+      margin: 12px 0 20px;
+      border-radius: 6px;
+    ">
+      <p style="margin: 0;">
+        #{body}
+      </p>
+    </div>
+
     #{button("View Request", "http://localhost:4000/requests/#{request.request_id}")}
 
     #{notice("Log in to your account to view the complete conversation.")}
@@ -243,6 +257,9 @@ defmodule CustomerSupport.Mailers.CustomerMailer do
 
     Request ID: #{request.request_id}
     Title: #{request.title}
+
+    Support staff message:
+    #{body}
 
     View your request:
     http://localhost:4000/requests/#{request.request_id}

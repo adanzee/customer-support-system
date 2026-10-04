@@ -2,6 +2,7 @@ defmodule CustomerSupportWeb.StaffRequestShowLive do
   use CustomerSupportWeb, :live_view
 
   alias CustomerSupport.SupportStaff
+  alias CustomerSupportWeb.DateTimeHelper
 
   on_mount {CustomerSupportWeb.StaffAuthHook, :default}
 
@@ -23,7 +24,11 @@ defmodule CustomerSupportWeb.StaffRequestShowLive do
           topic
         )
 
-        {:ok, assign(socket, :request, request)}
+         {:ok,
+         socket
+         |> assign(:request, request)
+         |> assign(:message_body, "")
+         |> assign(:reply_form_key, 0)}
     end
   end
 
@@ -37,13 +42,11 @@ defmodule CustomerSupportWeb.StaffRequestShowLive do
     {:noreply, assign(socket, :request, request)}
   end
 
-  def handle_info({:status_updated, status}, socket) do
-    request = %{socket.assigns.request | status: status}
-
+  def handle_info({:status_updated, _request_id, status}, socket) do
     {:noreply,
-     socket
-     |> assign(:request, request)
-     |> put_flash(:info, "Request status updated to #{status}.")}
+    socket
+    |> assign(:request, %{socket.assigns.request | status: status})
+    |> put_flash(:info, "Request status updated to #{status}.")}
   end
 
   def handle_event("update_status", %{"status" => status}, socket) do
@@ -80,14 +83,16 @@ defmodule CustomerSupportWeb.StaffRequestShowLive do
         request =
           SupportStaff.get_assigned_request(staff_id, request_id)
 
-        {:noreply,
-         socket
-         |> assign(:request, request)
-         |> put_flash(:info, "Message sent successfully.")}
+
+      {:noreply,
+      socket
+      |> assign(:request, request)
+      |> assign(:reply_form_key, socket.assigns.reply_form_key + 1)
+      |> put_flash(:info, "Message sent successfully.")}
 
       {:error, :request_not_found} ->
         {:noreply,
-         put_flash(socket, :error, "Request not found.")}
+        put_flash(socket, :error, "Request not found.")}
     end
   end
 
@@ -374,11 +379,8 @@ defmodule CustomerSupportWeb.StaffRequestShowLive do
                           else: "Customer" %>
                       </span>
 
-                      <span class="text-[11px] text-[#3C5070]/70">
-                        <%= Calendar.strftime(
-                          message.inserted_at,
-                          "%b %d, %Y at %I:%M %p"
-                        ) %>
+                     <span class="text-[11px] text-[#3C5070]/70">
+                        <%= CustomerSupportWeb.DateTimeHelper.format_local(message.inserted_at) %>
                       </span>
                     </div>
 
@@ -405,7 +407,11 @@ defmodule CustomerSupportWeb.StaffRequestShowLive do
             <!-- REPLY FORM -->
             <div class="border-t border-[#D9CBC2] p-4 bg-white">
 
-              <.form for={%{}} phx-submit="send_message">
+              <.form
+                id={"reply-form-#{@reply_form_key}"}
+                for={%{}}
+                phx-submit="send_message"
+              >
 
                 <textarea
                   name="body"

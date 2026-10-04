@@ -13,15 +13,19 @@ defmodule CustomerSupport.Accounts do
   end
 
   # does a customer with this email exist
-  def authenticate_customer(email, password) do
-    customer = get_customer_by_email(email)
+def authenticate_customer(email, password) do
+  case get_customer_by_email(email) do
+    nil ->
+      {:error, :account_not_found}
 
-    if customer && Bcrypt.verify_pass(password, customer.password_hash) do
-      {:ok, customer}
-    else
-      {:error, :invalid_credentials}
-    end
+    customer ->
+      if Bcrypt.verify_pass(password, customer.password_hash) do
+        {:ok, customer}
+      else
+        {:error, :invalid_credentials}
+      end
   end
+end
 
   def get_customer(customer_id) do
     Repo.get(Customer, customer_id)

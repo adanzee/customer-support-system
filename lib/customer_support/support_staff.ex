@@ -7,6 +7,8 @@ defmodule CustomerSupport.SupportStaff do
   alias CustomerSupport.Requests.Message
   alias CustomerSupport.PubSub
   alias CustomerSupport.ActivityLogs
+  alias CustomerSupport.Mailers.CustomerMailer
+  alias CustomerSupport.Mailer
 
  def create_staff(attrs) do
     case %Staff{}
@@ -28,6 +30,50 @@ defmodule CustomerSupport.SupportStaff do
     end
   end
 
+  def update_request_status(staff_id, request_id, new_status) do
+    case Repo.get(Request, request_id) do
+      nil ->
+        {:error, :request_not_found}
+
+      request ->
+        cond do
+          request.staff_id != staff_id ->
+            {:error, :unauthorized}
+
+          not Request.valid_status_transition?(request.status, new_status) ->
+            {:error, :invalid_status_transition}
+
+          true ->
+            case request
+                |> Ecto.Changeset.change(status: new_status)
+                |> Repo.update() do
+
+                {:ok, updated_request} ->
+                  customer = CustomerSupport.Accounts.get_customer(updated_request.customer_id)
+
+                  customer
+                  |> CustomerMailer.request_status_changed_email(
+                    updated_request,
+                    request.status
+                  )
+                  |> Mailer.deliver()
+
+                  Phoenix.PubSub.broadcast(
+                    PubSub,
+                    "request:#{request_id}",
+                    {:status_updated, request_id, new_status}
+                  )
+
+
+
+                {:ok, updated_request}
+
+              error ->
+                error
+            end
+        end
+    end
+  end
   def update_staff(staff, attrs) do
     staff
     |> Staff.update_changeset(attrs)
@@ -47,21 +93,21 @@ defmodule CustomerSupport.SupportStaff do
   end
 
  def authenticate_staff(email, password) do
-    case get_staff_by_email(email) do
-      nil ->
+  case get_staff_by_email(email) do
+    nil ->
+      {:error, :not_team_member}
+
+    %{status: "disabled"} ->
+      {:error, :account_disabled}
+
+    staff ->
+      if Bcrypt.verify_pass(password, staff.password_hash) do
+        {:ok, staff}
+      else
         {:error, :invalid_credentials}
-
-      %{status: "disabled"} ->
-        {:error, :account_disabled}
-
-      staff ->
-        if Bcrypt.verify_pass(password, staff.password_hash) do
-          {:ok, staff}
-        else
-          {:error, :invalid_credentials}
-        end
-    end
+      end
   end
+end
 
  def delete_staff(staff) do
     case Repo.delete(staff) do
@@ -132,33 +178,6 @@ defmodule CustomerSupport.SupportStaff do
   end
 
 
-  def update_request_status(staff_id, request_id, status) do
-    case get_assigned_request(staff_id, request_id) do
-      nil ->
-        {:error, :request_not_found}
-
-      request ->
-        if Request.valid_status_transition?(request.status, status) do
-          case request
-              |> Request.changeset(%{status: status})
-              |> Repo.update() do
-            {:ok, updated_request} ->
-              Phoenix.PubSub.broadcast(
-                PubSub,
-                "request:#{request_id}",
-                {:status_updated, updated_request.status}
-              )
-
-              {:ok, updated_request}
-
-            error ->
-              error
-          end
-        else
-          {:error, :invalid_status_transition}
-        end
-    end
-  end
 
   def count_staff do
     Repo.aggregate(Staff, :count, :staff_id)
@@ -166,12 +185,14 @@ defmodule CustomerSupport.SupportStaff do
 
 
 
-  def create_request_message(staff_id, request_id, body) do
+    def create_request_message(staff_id, request_id, body) do
     case get_assigned_request(staff_id, request_id) do
       nil ->
         {:error, :request_not_found}
 
       request ->
+        request = Repo.preload(request, [:customer, :staff])
+
         case %Message{}
             |> Message.changeset(%{
               request_id: request.request_id,
@@ -181,6 +202,15 @@ defmodule CustomerSupport.SupportStaff do
             })
             |> Repo.insert() do
           {:ok, message} ->
+            # Notify customer by email
+           request.customer
+            |> CustomerSupport.Mailers.CustomerMailer.staff_replied_email(
+              request,
+              body
+            )
+            |> CustomerSupport.Mailer.deliver()
+
+            # Real-time notification
             topic = "request:#{request_id}"
 
             IO.inspect(topic, label: "STAFF BROADCAST TOPIC")

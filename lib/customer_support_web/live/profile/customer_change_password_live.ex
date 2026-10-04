@@ -2,12 +2,24 @@ defmodule CustomerSupportWeb.CustomerChangePasswordLive do
   use CustomerSupportWeb, :live_view
 
   alias CustomerSupport.Accounts
+  alias CustomerSupport.Accounts.Customer
 
   def mount(_params, session, socket) do
     customer_id = session["customer_id"]
     customer = Accounts.get_customer(customer_id)
 
-    {:ok, assign(socket, :customer, customer)}
+    changeset =
+      Customer.password_validation_changeset(customer, %{
+        "password" => "",
+        "password_confirmation" => ""
+      })
+
+    {:ok,
+     assign(socket,
+       customer: customer,
+       changeset: changeset,
+       form: to_form(changeset)
+     )}
   end
 
   def handle_event("change_password", %{"password" => params}, socket) do
@@ -25,10 +37,13 @@ defmodule CustomerSupportWeb.CustomerChangePasswordLive do
          put_flash(socket, :error, "Current password is incorrect.")}
 
       {:error, changeset} ->
+        changeset = Map.put(changeset, :action, :validate)
+
         {:noreply,
-         socket
-         |> assign(:changeset, changeset)
-         |> put_flash(:error, "Please check your new password.")}
+         assign(socket,
+           changeset: changeset,
+           form: to_form(changeset)
+         )}
     end
   end
 
@@ -39,6 +54,7 @@ defmodule CustomerSupportWeb.CustomerChangePasswordLive do
         <h1 class="text-3xl font-bold text-[#112250]">
           Change Password
         </h1>
+
         <p class="mt-2 text-[#3C5070]">
           Update your account password
         </p>
@@ -46,7 +62,13 @@ defmodule CustomerSupportWeb.CustomerChangePasswordLive do
 
       <div class="max-w-xl mx-auto">
         <div class="rounded-2xl border border-[#D9CBC2]/50 bg-white p-8 shadow-sm">
-          <form phx-submit="change_password" class="space-y-6">
+
+          <form
+            phx-submit="change_password"
+            class="space-y-6"
+          >
+
+            <!-- Current Password -->
             <div>
               <label
                 for="current_password"
@@ -83,16 +105,13 @@ defmodule CustomerSupportWeb.CustomerChangePasswordLive do
                     }
                   "
                 >
-                  <span id="current-password-eye-show">
-                    👁
-                  </span>
-                  <span id="current-password-eye-hide" class="hidden">
-                    🙈
-                  </span>
+                  <span id="current-password-eye-show">👁</span>
+                  <span id="current-password-eye-hide" class="hidden">🙈</span>
                 </button>
               </div>
             </div>
 
+            <!-- New Password -->
             <div>
               <label
                 for="new_password"
@@ -129,16 +148,19 @@ defmodule CustomerSupportWeb.CustomerChangePasswordLive do
                     }
                   "
                 >
-                  <span id="new-password-eye-show">
-                    👁
-                  </span>
-                  <span id="new-password-eye-hide" class="hidden">
-                    🙈
-                  </span>
+                  <span id="new-password-eye-show">👁</span>
+                  <span id="new-password-eye-hide" class="hidden">🙈</span>
                 </button>
               </div>
+
+              <%= if @changeset.action && @changeset.errors[:password] do %>
+                <p class="mt-1 text-xs text-red-600">
+                  {elem(@changeset.errors[:password], 0)}
+                </p>
+              <% end %>
             </div>
 
+            <!-- Confirm New Password -->
             <div>
               <label
                 for="new_password_confirmation"
@@ -175,16 +197,19 @@ defmodule CustomerSupportWeb.CustomerChangePasswordLive do
                     }
                   "
                 >
-                  <span id="confirm-password-eye-show">
-                    👁
-                  </span>
-                  <span id="confirm-password-eye-hide" class="hidden">
-                    🙈
-                  </span>
+                  <span id="confirm-password-eye-show">👁</span>
+                  <span id="confirm-password-eye-hide" class="hidden">🙈</span>
                 </button>
               </div>
+
+              <%= if @changeset.action && @changeset.errors[:password_confirmation] do %>
+                <p class="mt-1 text-xs text-red-600">
+                  {elem(@changeset.errors[:password_confirmation], 0)}
+                </p>
+              <% end %>
             </div>
 
+            <!-- Submit -->
             <div class="pt-2">
               <button
                 type="submit"
@@ -193,6 +218,7 @@ defmodule CustomerSupportWeb.CustomerChangePasswordLive do
                 Change Password
               </button>
             </div>
+
           </form>
         </div>
       </div>

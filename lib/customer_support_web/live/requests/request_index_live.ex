@@ -6,10 +6,34 @@ defmodule CustomerSupportWeb.RequestIndexLive do
   def mount(_params, session, socket) do
     customer_id = session["customer_id"]
 
+
     requests = Requests.list_requests_by_customer(customer_id)
+
+    Enum.each(requests, fn request ->
+      Phoenix.PubSub.subscribe(
+        CustomerSupport.PubSub,
+        "request:#{request.request_id}"
+      )
+    end)
+
 
     {:ok, assign(socket, :requests, requests)}
   end
+
+ def handle_info({:status_updated, request_id, status}, socket) do
+
+
+  requests =
+    Enum.map(socket.assigns.requests, fn request ->
+      if request.request_id == request_id do
+        %{request | status: status}
+      else
+        request
+      end
+    end)
+
+  {:noreply, assign(socket, :requests, requests)}
+end
 
   def render(assigns) do
     ~H"""

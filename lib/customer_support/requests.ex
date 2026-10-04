@@ -220,22 +220,37 @@ defmodule CustomerSupport.Requests do
     |> Repo.all()
   end
 
-  def create_customer_message(request_id, customer_id, body) do
-    case get_request_for_customer(request_id, customer_id) do
-      nil ->
-        {:error, :unauthorized}
+    def create_request_message(staff_id, request_id, body) do
+    request =
+      Request
+      |> where([r], r.request_id == ^request_id and r.staff_id == ^staff_id)
+      |> Repo.one()
+      |> Repo.preload([:customer, :staff])
 
-      _request ->
-        case create_message(%{
-              request_id: request_id,
-              sender_type: "customer",
-              sender_id: customer_id,
+    case request do
+      nil ->
+        {:error, :request_not_found}
+
+      request ->
+        case %Message{}
+            |> Message.changeset(%{
+              request_id: request.request_id,
+              sender_type: "staff",
+              sender_id: staff_id,
               body: body
-            }) do
+            })
+            |> Repo.insert() do
           {:ok, message} ->
+            request.customer
+            |> CustomerSupport.Mailers.CustomerMailer.staff_replied_email(
+              request,
+              body
+            )
+            |> CustomerSupport.Mailer.deliver()
+
             topic = "request:#{request_id}"
 
-            IO.inspect(topic, label: "CUSTOMER BROADCAST TOPIC")
+            IO.inspect(topic, label: "STAFF BROADCAST TOPIC")
 
             result =
               Phoenix.PubSub.broadcast(
@@ -244,7 +259,7 @@ defmodule CustomerSupport.Requests do
                 {:new_message, message}
               )
 
-            IO.inspect(result, label: "CUSTOMER BROADCAST RESULT")
+            IO.inspect(result, label: "STAFF BROADCAST RESULT")
 
             {:ok, message}
 
@@ -265,4 +280,6 @@ defmodule CustomerSupport.Requests do
       :request_id
     )
   end
+
+
 end

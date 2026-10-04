@@ -37,24 +37,34 @@ defmodule CustomerSupport.Accounts.Customer do
 
   def profile_changeset(customer, attrs) do
     customer
-    |> cast(attrs, [:name, :phone])
-    |> validate_required([:name, :phone])
+    |> cast(attrs, [:name, :email, :phone])
+    |> update_change(:email, &String.downcase/1)
+    |> validate_required([:name, :email, :phone])
+    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/)
+    |> unique_constraint(:email)
   end
 
   def password_changeset(customer, attrs) do
+    customer
+    |> password_validation_changeset(attrs)
+    |> put_password_hash()
+  end
+
+  def password_validation_changeset(customer, attrs) do
     customer
     |> cast(attrs, [:password, :password_confirmation])
     |> validate_required([:password, :password_confirmation])
     |> validate_length(:password, min: 8)
     |> validate_confirmation(:password, required: true)
-    |> put_password_hash()
   end
 
-  defp put_password_hash(changeset) do
+  defp put_password_hash(%Ecto.Changeset{valid?: true} = changeset) do
     if password = get_change(changeset, :password) do
       put_change(changeset, :password_hash, Bcrypt.hash_pwd_salt(password))
     else
       changeset
     end
   end
+
+  defp put_password_hash(changeset), do: changeset
 end

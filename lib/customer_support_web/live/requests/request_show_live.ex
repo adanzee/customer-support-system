@@ -15,6 +15,7 @@ defmodule CustomerSupportWeb.RequestShowLive do
          |> push_navigate(to: ~p"/requests")}
 
       request ->
+
         Phoenix.PubSub.subscribe(
           CustomerSupport.PubSub,
           "request:#{request_id}"
@@ -49,7 +50,7 @@ defmodule CustomerSupportWeb.RequestShowLive do
     {:noreply, assign(socket, :messages, messages)}
   end
 
-  def handle_info({:status_updated, status}, socket) do
+  def handle_info({:status_updated, _request_id, status}, socket) do
     {:noreply,
     socket
     |> assign(:request, %{socket.assigns.request | status: status})

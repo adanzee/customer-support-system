@@ -7,22 +7,35 @@ defmodule CustomerSupportWeb.Plugs.CustomerAuth do
   def init(opts), do: opts
 
   def call(conn, _opts) do
-    case get_session(conn, :customer_id) do
-      nil ->
+    cond do
+      get_session(conn, :staff_id) != nil ->
         conn
-        |> put_session(:auth_error, "Please log in first.")
+        |> put_flash(:error, "You are not authorized to access this portal.")
+        |> redirect(to: "/support/staff/dashboard")
+        |> halt()
+
+      get_session(conn, :manager_id) != nil ->
+        conn
+        |> put_flash(:error, "You are not authorized to access this portal.")
+        |> redirect(to: "/support/manager/dashboard")
+        |> halt()
+
+      is_nil(get_session(conn, :customer_id)) ->
+        conn
+        |> put_flash(:error, "Please log in first.")
         |> redirect(to: "/login")
         |> halt()
 
-      customer_id ->
-        case Accounts.get_customer(customer_id) do
-          nil ->
-            conn
-            |> delete_session(:customer_id)
-            |> put_session(:auth_error, "Please log in again.")
-            |> redirect(to: "/login")
-            |> halt()
+      true ->
+        customer_id = get_session(conn, :customer_id)
 
+        case Accounts.get_customer(customer_id) do
+         nil ->
+          conn
+          |> delete_session(:customer_id)
+          |> put_flash(:error, "Please log in again.")
+          |> redirect(to: "/login")
+          |> halt()
           customer ->
             assign(conn, :current_customer, customer)
         end
