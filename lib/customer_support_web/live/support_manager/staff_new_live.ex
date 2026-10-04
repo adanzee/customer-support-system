@@ -5,6 +5,7 @@ defmodule CustomerSupportWeb.StaffNewLive do
   alias CustomerSupport.SupportStaff.Staff
   alias CustomerSupport.SupportStaff
   alias CustomerSupport.Requests
+  alias CustomerSupport.Mailers.StaffWelcomeMailer
 
   on_mount {CustomerSupportWeb.ManagerAuthHook, :default}
 
@@ -39,11 +40,15 @@ defmodule CustomerSupportWeb.StaffNewLive do
 
   def handle_event("create_staff", %{"staff" => params}, socket) do
     case SupportStaff.create_staff(params) do
-      {:ok, _staff} ->
+      {:ok, staff, initial_password} ->
+        staff
+        |> StaffWelcomeMailer.welcome_email(initial_password)
+        |> CustomerSupport.Mailer.deliver()
+
         {:noreply,
-         socket
-         |> put_flash(:info, "Support staff member created successfully.")
-         |> push_navigate(to: ~p"/support/manager/staff")}
+        socket
+        |> put_flash(:info, "Support staff member created successfully.")
+        |> push_navigate(to: ~p"/support/manager/staff")}
 
       {:error, changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}

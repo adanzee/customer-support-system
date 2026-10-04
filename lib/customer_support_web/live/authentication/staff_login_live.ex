@@ -108,8 +108,12 @@ defmodule CustomerSupportWeb.StaffLoginLive do
                   class="w-full rounded-xl border border-[#3C5070] bg-[#112250]/70 px-4 py-3 text-xs text-[#F5F0E9] placeholder-[#3C5070] transition-all outline-none focus:border-[#E0C58F] focus:ring-1 focus:ring-[#E0C58F]"
                 />
               </div>
+              <.link navigate={~p"/support/staff/forgot-password"} class="text-xs font-semibold text-[#E0C58F] hover:underline transition">
+                  Forgot password?
+                </.link>
             <!-- SUBMIT -->
             <div class="pt-3">
+
               <button
                 type="submit"
                 class="w-full rounded-xl bg-[#E0C58F] hover:bg-[#F5F0E9] active:scale-[0.98] text-[#112250] py-3.5 px-4 text-xs font-mono font-bold uppercase tracking-widest transition-all shadow-lg shadow-black/20 flex items-center justify-center gap-2 group cursor-pointer"

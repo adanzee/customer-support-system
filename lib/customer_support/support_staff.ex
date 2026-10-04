@@ -11,6 +11,8 @@ defmodule CustomerSupport.SupportStaff do
   alias CustomerSupport.Mailer
 
  def create_staff(attrs) do
+    initial_password = attrs["password"] || attrs[:password]
+
     case %Staff{}
         |> Staff.changeset(attrs)
         |> Repo.insert() do
@@ -23,7 +25,7 @@ defmodule CustomerSupport.SupportStaff do
           actor_type: "manager"
         })
 
-        {:ok, staff}
+        {:ok, staff, initial_password}
 
       error ->
         error
@@ -181,6 +183,18 @@ end
 
   def count_staff do
     Repo.aggregate(Staff, :count, :staff_id)
+  end
+
+  def change_password(staff_id, password) do
+    case get_staff(staff_id) do
+      nil ->
+        {:error, :not_found}
+
+      staff ->
+        staff
+        |> Staff.password_changeset(%{password: password})
+        |> Repo.update()
+    end
   end
 
 

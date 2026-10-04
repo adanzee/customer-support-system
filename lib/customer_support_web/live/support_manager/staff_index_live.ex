@@ -245,12 +245,10 @@ defmodule CustomerSupportWeb.StaffIndexLive do
                         <td class="whitespace-nowrap px-6 py-4">
                           <div>
                             <p class="text-xs font-bold text-slate-900">
-                              <%= Calendar.strftime(staff.inserted_at, "%d %b %Y") %>
+                              <%= CustomerSupportWeb.DateTimeHelper.format_local(staff.inserted_at) %>
                             </p>
 
-                            <p class="mt-0.5 text-[11px] text-slate-500">
-                              <%= Calendar.strftime(staff.inserted_at, "%I:%M %p") %>
-                            </p>
+
                           </div>
                         </td>
 

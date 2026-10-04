@@ -32,6 +32,14 @@ defmodule CustomerSupport.SupportStaff.Staff do
     |> unique_constraint(:email)
   end
 
+  def password_changeset(staff, attrs) do
+    staff
+    |> cast(attrs, [:password])
+    |> validate_required([:password])
+    |> validate_length(:password, min: 8)
+    |> hash_password()
+  end
+
   defp hash_password(
          %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
        ) do

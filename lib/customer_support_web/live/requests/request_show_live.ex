@@ -67,7 +67,7 @@ defmodule CustomerSupportWeb.RequestShowLive do
     customer_id = socket.assigns.request.customer_id
     request_id = socket.assigns.request.request_id
 
-    case Requests.create_customer_message(request_id, customer_id, body) do
+    case Requests.create_request_message(request_id, customer_id, body) do
       {:ok, message} ->
         {:noreply,
          socket

@@ -65,6 +65,8 @@ defmodule CustomerSupportWeb.Router do
     live "/support/staff/login", StaffLoginLive
     post "/support/staff/login", StaffLoginController, :create
     post "/support/staff/logout", StaffLoginController, :delete
+    live "/support/staff/forgot-password", StaffForgotPasswordLive
+    live "/support/staff/reset-password/:token", StaffResetPasswordLive
 
     # Manager authentication
     live "/support/login", ManagerLoginLive
@@ -101,6 +103,7 @@ defmodule CustomerSupportWeb.Router do
     live "/support/staff/dashboard", StaffDashboardLive
     live "/support/staff/requests", SupportStaffRequestIndexLive
     live "/support/staff/requests/:id", StaffRequestShowLive
+    live "/support/staff/change-password", StaffChangePasswordLive
   end
   # Other scopes may use custom stacks.
   # scope "/api", CustomerSupportWeb do

@@ -298,7 +298,7 @@ defmodule CustomerSupportWeb.StaffEditLive do
                 <div>
                   <p class="text-xs font-semibold text-[#3C5070]">Created</p>
                   <p class="mt-0.5 text-sm font-medium text-[#112250]">
-                    <%= if Map.has_key?(@staff, :inserted_at) and @staff.inserted_at, do: Calendar.strftime(@staff.inserted_at, "%d %b %Y"), else: "02 Oct 2026" %>
+                    <%= if Map.has_key?(@staff, :inserted_at) and @staff.inserted_at, do: CustomerSupportWeb.DateTimeHelper.format_local(@staff.inserted_at), else: "" %>
                   </p>
                 </div>
 

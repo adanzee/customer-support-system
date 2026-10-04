@@ -10,7 +10,7 @@ def mount(_params, _session, socket) do
   if connected?(socket) do
     topic = "staff:#{staff_id}"
 
-    IO.inspect(topic, label: "STAFF SUBSCRIBED TO")
+
 
     Phoenix.PubSub.subscribe(
       CustomerSupport.PubSub,
@@ -107,6 +107,13 @@ end
             <span class="text-[11px] font-mono font-bold text-[#112250]">
               <%= @current_staff.staff_identifier %>
             </span>
+
+            <.link
+              navigate={~p"/support/staff/change-password"}
+              class="text-xs font-mono font-bold uppercase tracking-wider text-[#3C5070] hover:text-[#112250] transition-colors"
+            >
+               | Change Password
+            </.link>
           </div>
         </div>
 
